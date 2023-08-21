@@ -1,21 +1,19 @@
 package format
 
 type RequestPackage struct {
-	Method string `xml:"method"`
-	Url    string `xml:"url"`
-	Header string `xml:"header"`
+	Method   string     `json:"Method"`
+	Url      string     `json:"Url"`
+	PathList PathList   `json:"PathList"`
+	Header   HeaderList `json:"HeaderList"`
+	Body     string     `json:"Body"`
 }
 
-// 示例xml
-// <data>
-//    <person>
-//        <name>John Doe</name>
-//        <age>30</age>
-//        <country>USA</country>
-//    </person>
-//    <person>
-//        <name>Jane Smith</name>
-//        <age>25</age>
-//        <country>Canada</country>
-//    </person>
-//</data>
+type PathList struct {
+	Path string `json:"Path"`
+}
+type HeaderList struct {
+	UserAgent      string `json:"User-Agent"`
+	AcceptEncoding string `json:"Accept-Encoding"`
+	Accept         string `json:"Accept"`
+	Cookie         string `json:"Cookie"`
+}
