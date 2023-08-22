@@ -27,8 +27,8 @@ func main() {
 	inputPocJsonValue := *inputPocJson
 	inputProxyValue := *inputProxy
 
-	var requestPackage = handle.HandleJsonFunc(inputPocJsonValue)
+	var pocStruct = handle.HandleJsonFunc(inputPocJsonValue)
 
-	http.Send(requestPackage, inputProxyValue)
+	http.Send(pocStruct, inputProxyValue)
 
 }

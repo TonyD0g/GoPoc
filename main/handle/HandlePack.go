@@ -18,6 +18,7 @@ func HandlePackFunc(resp *http.Request, requestPackage format.RequestPackage) {
 		"Cookie":          "",
 		"Accept":          "*/*",
 		"connection":      "close",
+		"Content-Type":    "text/html; charset=UTF-8",
 		// 添加更多的默认头部
 		// ...
 	}
@@ -28,6 +29,7 @@ func HandlePackFunc(resp *http.Request, requestPackage format.RequestPackage) {
 		"Cookie":          "Cookie",
 		"Accept":          "Accept",
 		"connection":      "connection",
+		"Content-Type":    "text/html; charset=UTF-8",
 		// 添加更多的默认头部
 		// ...
 	}

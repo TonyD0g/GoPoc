@@ -1,0 +1,27 @@
+package http
+
+import (
+	"net/http"
+	"net/url"
+)
+
+func SetProxy(inputProxy string) *http.Client {
+	// 创建一个代理函数，将请求发送到指定的本地端口
+	proxy := func(_ *http.Request) (*url.URL, error) {
+		if inputProxy != "" {
+			return url.Parse(inputProxy)
+		}
+		return url.Parse("http://localhost:8080")
+	}
+
+	// 创建一个自定义的 Transport，并设置代理函数
+	transport := &http.Transport{
+		Proxy: proxy,
+	}
+
+	// 创建一个使用自定义 Transport 的 HTTP 客户端
+	client := &http.Client{
+		Transport: transport,
+	}
+	return client
+}
