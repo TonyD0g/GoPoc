@@ -6,10 +6,11 @@ import (
 	"reflect"
 )
 
-func HandlePackFunc(resp *http.Request, requestPackage format.RequestPackage) {
+// HandlePackFunc Used to process packages
+func HandlePackFunc(procedureResponse *http.Request, requestPackage format.RequestPackage) {
 	isHasExist := make(map[string]bool)
-	val := reflect.ValueOf(requestPackage.Header)
-	typ := val.Type()
+	reflectValue := reflect.ValueOf(requestPackage.Header)
+	reflectValueType := reflectValue.Type()
 
 	defaultHeaders := map[string]string{
 		"User-Agent":      "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0",
@@ -19,7 +20,7 @@ func HandlePackFunc(resp *http.Request, requestPackage format.RequestPackage) {
 		"Accept":          "*/*",
 		"connection":      "close",
 		"Content-Type":    "text/html; charset=UTF-8",
-		// 添加更多的默认头部
+		// you can add more default headers
 		// ...
 	}
 	defaultHeadersList := map[string]string{
@@ -30,28 +31,28 @@ func HandlePackFunc(resp *http.Request, requestPackage format.RequestPackage) {
 		"Accept":          "Accept",
 		"connection":      "connection",
 		"Content-Type":    "text/html; charset=UTF-8",
-		// 添加更多的默认头部
+		// you can add more default headers
 		// ...
 	}
 
-	for i := 0; i < typ.NumField(); i++ {
-		field := typ.Field(i)
-		value := val.Field(i).String()
+	for index := 0; index < reflectValueType.NumField(); index++ {
+		field := reflectValueType.Field(index)
+		value := reflectValue.Field(index).String()
 		headerName := field.Tag
 		headerName = headerName[len(headerName)-(len(headerName)-6):]
 		headerName = headerName[0 : len(headerName)-1]
 		isHasExist[string(headerName)] = true
 
 		if value != "" {
-			resp.Header.Add(string(headerName), value)
+			procedureResponse.Header.Add(string(headerName), value)
 		} else if defaultValue, ok := defaultHeaders[string(headerName)]; ok {
-			resp.Header.Add(string(headerName), defaultValue)
+			procedureResponse.Header.Add(string(headerName), defaultValue)
 		}
 	}
 
-	for keyA := range isHasExist {
-		if _, ok := defaultHeadersList[keyA]; !ok {
-			resp.Header.Add(keyA, defaultHeaders[keyA])
+	for index := range isHasExist {
+		if _, ok := defaultHeadersList[index]; !ok {
+			procedureResponse.Header.Add(index, defaultHeaders[index])
 		}
 	}
 

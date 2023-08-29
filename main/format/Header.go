@@ -7,4 +7,5 @@ type Header struct {
 	Cookie         string `json:"Cookie"`
 	Host           string `json:"Host"`
 	ContentType    string `json:"Content-Type"`
+	Status         string `json:"Status"`
 }

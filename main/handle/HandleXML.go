@@ -3,6 +3,7 @@ package handle
 import (
 	"Scanner/main/format"
 	"encoding/xml"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -18,16 +19,16 @@ func HandleXMLFunc(inputXml string) format.RequestPackage {
 	var requestPackage format.RequestPackage
 	err = xml.Unmarshal(xmlData, &requestPackage)
 	if err != nil {
-		fmt.Println("[-] Error unmarshaling XML:", err)
+		fmt.Println("[-] Error unmarshalling XML:", err)
 		os.Exit(1)
 	}
 	return requestPackage
 }
 
-func CheckFileCorrectness(requestPackage format.RequestPackage) bool {
+func CheckFileCorrectness(requestPackage format.RequestPackage) {
 	if requestPackage.Method != "GET" && requestPackage.Url != "POST" {
 		fmt.Print("[-] error! You must provide the correct method")
-		return false
+		flag.Usage()
+		os.Exit(1)
 	}
-	return true
 }

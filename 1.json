@@ -1,0 +1,52 @@
+{
+
+"RequestPackage":{
+		"Method": "GET",
+		 
+		"Uri": [
+		      "/index1.html",
+		      "/robots.txt"
+	   			],
+	
+
+		"Header":{
+			"User-Agent":"hello",
+			"Accept-Encoding":"gzip",
+			"Cookie": "123"
+		},
+
+		"Body":"abc=123"
+},
+
+"ResponsePackage":{
+		"Operation":"OR",
+		"Group":[
+
+			    {
+			        "Header":{
+			                            "Status": "200",
+			                            "Content-Type": "text/html; charset=UTF-8"      
+			            },
+
+			        "Body":[
+			                            "baidu_union_verify"
+			            ]  
+			    },
+
+			     {
+			        "Header":{
+			                            "Status": "200"      
+			            },
+			            
+			        "Body":[
+			                            "baidu_union_verify"
+			            ]  
+			    }
+
+]
+
+}
+
+}
+
+
