@@ -1,17 +1,18 @@
 package handle
 
 import (
-	"Scanner/main/format"
+	"Scanner/main/Developer/format"
 	"net/http"
 	"reflect"
 )
 
-// HandlePackFunc Used to process packages
-func HandlePackFunc(procedureResponse *http.Request, requestPackage format.RequestPackage) {
+// ProcessPackages Used to process packages
+func ProcessPackages(procedureResponse *http.Request, pocStruct format.PocStruct) {
 	isHasExist := make(map[string]bool)
-	reflectValue := reflect.ValueOf(requestPackage.Header)
+	reflectValue := reflect.ValueOf(pocStruct.RequestPackage.Header)
 	reflectValueType := reflectValue.Type()
 
+	// todo 增加随机 UA
 	defaultHeaders := map[string]string{
 		"User-Agent":      "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0",
 		"Accept-Encoding": "gzip, deflate",
@@ -55,5 +56,4 @@ func HandlePackFunc(procedureResponse *http.Request, requestPackage format.Reque
 			procedureResponse.Header.Add(index, defaultHeaders[index])
 		}
 	}
-
 }

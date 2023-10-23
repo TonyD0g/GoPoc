@@ -1,7 +1,7 @@
 package handle
 
 import (
-	"Scanner/main/format"
+	format2 "Scanner/main/Developer/format"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -9,9 +9,9 @@ import (
 	"strings"
 )
 
-var pocStruct format.PocStruct
+var pocStruct format2.PocStruct
 
-func HandleJsonFunc(inputXml string) format.PocStruct {
+func TryToParseJson(inputXml string) format2.PocStruct {
 	jsonData, err := ioutil.ReadFile(inputXml)
 	if err != nil {
 		fmt.Println("[-] Error reading file:", err)
@@ -27,7 +27,7 @@ func HandleJsonFunc(inputXml string) format.PocStruct {
 }
 
 // TraversePath Traverse the Path in the PathList and initiate a request
-func TraversePath(requestPackage format.RequestPackage, inputUrl string) []string {
+func TraversePath(requestPackage format2.RequestPackage, inputUrl string) []string {
 	var allReqPath []string
 	var i = 0
 

@@ -4,3 +4,11 @@ http://www.ip111.cn/
 C:\Users\xxx\Desktop\1.json
 -proxy
 http://127.0.0.1:8082
+
+------------------------
+
+todo :
+支持两个模式:
+1.json格式
+2.脚本模式
+
