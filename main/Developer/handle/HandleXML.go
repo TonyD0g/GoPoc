@@ -1,20 +1,20 @@
-package handle
+package Handle
 
 import (
-	"Scanner/main/Developer/format"
+	"Scanner/main/Developer/Format"
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
 	"os"
 )
 
-func ProcessXML(inputXml string) format.RequestPackage {
+func ProcessXML(inputXml string) Format.RequestPackage {
 	xmlData, err := ioutil.ReadFile(inputXml)
 	if err != nil {
 		fmt.Println("[-] Error reading file:", err)
 		os.Exit(1)
 	}
-	var requestPackage format.RequestPackage
+	var requestPackage Format.RequestPackage
 	err = xml.Unmarshal(xmlData, &requestPackage)
 	if err != nil {
 		fmt.Println("[-] Error unmarshalling XML:", err)

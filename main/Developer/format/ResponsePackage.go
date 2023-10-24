@@ -1,4 +1,4 @@
-package format
+package Format
 
 type ResponsePackage struct {
 	Operation string  `json:"Operation"`

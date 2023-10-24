@@ -1,4 +1,4 @@
-package format
+package Format
 
 type RequestPackage struct {
 	Method string   `json:"Method"`

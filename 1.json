@@ -1,10 +1,9 @@
 {
-
+"fofa":"body=\"hello world\"",
 "RequestPackage":{
 		"Method": "GET",
 		 
 		"Uri": [
-		      "/index1.html",
 		      "/robots.txt"
 	   			],
 	

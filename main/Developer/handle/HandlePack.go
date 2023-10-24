@@ -1,13 +1,13 @@
-package handle
+package Handle
 
 import (
-	"Scanner/main/Developer/format"
+	"Scanner/main/Developer/Format"
 	"net/http"
 	"reflect"
 )
 
 // ProcessPackages Used to process packages
-func ProcessPackages(procedureResponse *http.Request, pocStruct format.PocStruct) {
+func ProcessPackages(procedureResponse *http.Request, pocStruct Format.PocStruct) {
 	isHasExist := make(map[string]bool)
 	reflectValue := reflect.ValueOf(pocStruct.RequestPackage.Header)
 	reflectValueType := reflectValue.Type()

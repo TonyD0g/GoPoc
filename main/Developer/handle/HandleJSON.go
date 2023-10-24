@@ -1,7 +1,7 @@
-package handle
+package Handle
 
 import (
-	format2 "Scanner/main/Developer/format"
+	format2 "Scanner/main/Developer/Format"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -11,7 +11,7 @@ import (
 
 var pocStruct format2.PocStruct
 
-func TryToParseJson(inputXml string) format2.PocStruct {
+func TryToParsePocStruct(inputXml string) format2.PocStruct {
 	jsonData, err := ioutil.ReadFile(inputXml)
 	if err != nil {
 		fmt.Println("[-] Error reading file:", err)

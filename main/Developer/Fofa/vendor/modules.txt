@@ -1,0 +1,6 @@
+# github.com/buger/jsonparser v0.0.0-20160922145946-f04e003e4115
+## explicit
+github.com/buger/jsonparser
+# github.com/fofapro/fofa-go v0.0.0-20200317042037-c0caee09013d
+## explicit
+github.com/fofapro/fofa-go/fofa

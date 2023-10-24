@@ -1,4 +1,4 @@
-package format
+package Format
 
 type Header struct {
 	UserAgent      string `json:"User-Agent"`
