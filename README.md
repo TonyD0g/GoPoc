@@ -80,8 +80,5 @@ http://127.0.0.1:8082
 1. json模式添加 body 正则
 2. 支持 json/go 这两种POC方法
 3. 首先判断 url的最后是不是/
-
-3. 优化扫描速度,现在扫描速度太垃圾了
-3. 解决扫描bug:remote error: tls: user canceled
 ```
 
