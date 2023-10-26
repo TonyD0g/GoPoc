@@ -141,7 +141,7 @@ func (ff *Fofa) QueryAsJSON(page uint, args ...[]byte) ([]byte, error) {
 		[]byte("&qbase64="), q,
 		[]byte("&fields="), fields,
 		[]byte("&page="), []byte(strconv.Itoa(int(page))),
-		[]byte("&size="), []byte(strconv.Itoa(500)),
+		[]byte("&size="), []byte(strconv.Itoa(300)),
 	}, []byte(""))
 	//fmt.Printf("%s\n", q)
 	content, err := ff.Get(string(q))

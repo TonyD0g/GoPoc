@@ -60,95 +60,89 @@ func Send(pocStruct Format.PocStruct, queryResponse Fofa.QueryResponse, userInpu
 		}
 	}
 
-	var waitGroup sync.WaitGroup
-	var done = make(chan struct{})
+	waitGroup := &sync.WaitGroup{}
 	processedURLs := make(map[string]struct{}) // 用于存储已处理的URL
 
-	for _, tmpUrl := range urlsList {
-		allRequestPath := handle2.TraversePath(pocStruct.RequestPackage, tmpUrl)
-		requestCount := len(allRequestPath)
-		sem := make(chan struct{}, maxConcurrentLevel) // 控制并发度的信号量
+	// 计算要划分的小的urlsList数量
+	numThreads := maxConcurrentLevel
+	if numThreads > len(urlsList) {
+		numThreads = len(urlsList)
+	}
+	urlsPerThread := len(urlsList) / numThreads
+	var processedURLsMutex sync.Mutex
+	for i := 0; i < numThreads; i++ {
+		start := i * urlsPerThread
+		end := start + urlsPerThread
+		if i == numThreads-1 {
+			end = len(urlsList)
+		}
 
-		for i := 0; i < requestCount; i++ {
-			tmpUrlForAllRequestPath := allRequestPath[i]
+		subURLsList := urlsList[start:end]
+		waitGroup.Add(1)
+		go func(subURLs []string) {
+			defer waitGroup.Add(-1)
 
-			// 检查URL是否已经处理过，如果处理过则跳过
-			if _, exists := processedURLs[tmpUrlForAllRequestPath]; exists {
-				continue
-			}
+			for _, tmpUrl := range subURLs {
+				allRequestPath := handle2.TraversePath(pocStruct.RequestPackage, tmpUrl)
+				requestCount := len(allRequestPath)
 
-			sem <- struct{}{} // 占用一个并发度信号
-			waitGroup.Add(1)
-			processedURLs[tmpUrlForAllRequestPath] = struct{}{} // 标记URL已处理
+				for tmpI := 0; tmpI < requestCount; tmpI++ {
+					tmpUrlForAllRequestPath := allRequestPath[tmpI]
 
-			go func(url string) {
-				defer func() {
-					<-sem // 释放一个并发度信号
-					waitGroup.Done()
-				}()
+					processedURLsMutex.Lock() // 使用互斥锁保护对 processedURLs 的访问
+					// 检查URL是否已经处理过，如果处理过则跳过
+					if _, exists := processedURLs[tmpUrlForAllRequestPath]; exists {
+						processedURLsMutex.Unlock()
+						continue
+					}
+					processedURLsMutex.Unlock()                         // 解锁 processedURLs
+					processedURLs[tmpUrlForAllRequestPath] = struct{}{} // 标记URL已处理
 
-				if !sendRequest(pocStruct, client, url, customRequestBody) {
-					return
+					parsedURL, err := url.Parse(tmpUrlForAllRequestPath)
+					if err != nil {
+						continue
+					}
+					// Create an HTTP.Request object
+					procedureRequest, err := http.NewRequest(pocStruct.RequestPackage.Method, tmpUrlForAllRequestPath, bytes.NewBuffer(customRequestBody))
+					if err != nil {
+						continue
+					}
+					handle2.ProcessPackages(procedureRequest, pocStruct)
+
+					// Set a timeout for the request
+					ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
+					defer cancel()
+					procedureRequest = procedureRequest.WithContext(ctx)
+
+					// Send request and obtain response results
+					procedureResponse, err := client.Do(procedureRequest)
+					if err != nil {
+						continue
+					}
+					defer func(Body io.ReadCloser) {
+						if err = Body.Close(); err != nil {
+							return
+						}
+					}(procedureResponse.Body)
+
+					if Judge.IsExploitSuccess(pocStruct, procedureResponse, customRequestBody) {
+						if splitURL := strings.Split(tmpUrlForAllRequestPath, "?"); len(splitURL) >= 2 {
+							params := strings.Split(splitURL[1], "&")
+							encodedParams := make([]string, len(params))
+							for tmpI := range params {
+								p := strings.Split(params[tmpI], "=")
+								encodedParams[tmpI] = url.QueryEscape(p[0]) + "=" + url.QueryEscape(p[1])
+							}
+							fmt.Println("[+] [ " + parsedURL.Scheme + "://" + parsedURL.Host + "/" + strings.Join(encodedParams, "&") + " ]\tSuccess! The target may have this vulnerability")
+						} else {
+							fmt.Println("[+] [ " + parsedURL.Scheme + "://" + parsedURL.Host + "/" + " ]\tSuccess! The target may have this vulnerability")
+						}
+					}
+
 				}
-			}(tmpUrlForAllRequestPath)
 
-			if (i+1)%maxConcurrentLevel == 0 || i == requestCount-1 {
-				go func() {
-					waitGroup.Wait()
-				}()
 			}
-		}
+		}(subURLsList)
 	}
-
-	// 在主循环外部等待所有请求完成
-	go func() {
-		waitGroup.Wait()
-		close(done)
-	}()
-	select {
-	case <-done:
-	case <-time.After(2 * time.Second):
-	}
-}
-
-func sendRequest(pocStruct Format.PocStruct, client *http.Client, urlAndUri string, customRequestBody []byte) bool {
-	_, err := url.Parse(urlAndUri)
-	if err != nil {
-		return false
-	}
-	// Create an HTTP.Request object
-	procedureRequest, err := http.NewRequest(pocStruct.RequestPackage.Method, urlAndUri, bytes.NewBuffer(customRequestBody))
-	if err != nil {
-		return false
-	}
-	handle2.ProcessPackages(procedureRequest, pocStruct)
-
-	// Set a timeout for the request
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-	procedureRequest = procedureRequest.WithContext(ctx)
-
-	// Send request and obtain response results
-	procedureResponse, err := client.Do(procedureRequest)
-	if err != nil {
-		return false
-	}
-	defer func(Body io.ReadCloser) {
-		_ = Body.Close()
-	}(procedureResponse.Body)
-
-	if Judge.IsExploitSuccess(pocStruct, procedureResponse, customRequestBody) {
-		splitURL := strings.Split(urlAndUri, "?")
-		baseURL := splitURL[0] + "?"
-		params := strings.Split(splitURL[1], "&")
-		encodedParams := make([]string, len(params))
-		for i := range params {
-			p := strings.Split(params[i], "=")
-			encodedParams[i] = url.QueryEscape(p[0]) + "=" + url.QueryEscape(p[1])
-		}
-
-		fmt.Println("[+] [ " + baseURL + strings.Join(encodedParams, "&") + " ]\tSuccess! The target may have this vulnerability")
-		return true
-	}
-	return false
+	waitGroup.Wait()
 }

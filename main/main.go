@@ -29,7 +29,7 @@ func main() {
 	} else {
 		userInputDetectionURL = nil
 	}
-	maxConcurrentLevel := flag.String("maxConcurrentLevel", "2", "the max concurrency level")
+	maxConcurrentLevel := flag.String("maxConcurrentLevel", "3", "the max concurrency level")
 	inputPocJson := flag.String("pocJson", "", "Input the PocJson file")
 	inputProxy := flag.String("proxy", "http://127.0.0.1:8082", "Input the proxy")
 	inputFofaEmail := flag.String("email", "", "Input the fofa email")
@@ -43,7 +43,7 @@ func main() {
 	pocStruct := Handle.TryToParsePocStruct(*inputPocJson)
 	var queryResponse Fofa.QueryResponse
 	if userInputDetectionURL == nil {
-		err = json.Unmarshal(Fofa.Query(*inputFofaEmail, *inputFofaKey, pocStruct.Fofa, 3), &queryResponse)
+		err = json.Unmarshal(Fofa.Query(*inputFofaEmail, *inputFofaKey, pocStruct.Fofa, 6), &queryResponse)
 		if err != nil {
 			fmt.Println("Failed to parse JSON:", err)
 			os.Exit(1)
@@ -52,4 +52,5 @@ func main() {
 
 	fmt.Println("[+] 扫描开始,记得挂全局socks代理! :")
 	Http.Send(pocStruct, queryResponse, userInputDetectionURL, *inputProxy, maxConcurrentLevelInt)
+	fmt.Println("\n[+] 扫描结束")
 }

@@ -9,39 +9,22 @@
 	
 
 		"Header":{
-			"User-Agent":"hello",
-			"Accept-Encoding":"gzip",
-			"Cookie": "123"
-		},
-
-		"Body":"abc=123"
+			"Accept-Encoding":"gzip"
+		}
 },
 
 "ResponsePackage":{
 		"Operation":"OR",
 		"Group":[
-
-			    {
-			        "Header":{
-			                            "Status": "200",
-			                            "Content-Type": "text/html; charset=UTF-8"      
-			            },
-
-			        "Body":[
-			                            "baidu_union_verify"
-			            ]  
-			    },
-
-			     {
+				{
 			        "Header":{
 			                            "Status": "200"      
 			            },
 			            
 			        "Body":[
-			                            "baidu_union_verify"
+			        				    "Hello World"
 			            ]  
 			    }
-
 			]
 
 }

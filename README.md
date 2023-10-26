@@ -21,40 +21,11 @@
 -proxy // burpsuite 代理 (必须)
 -maxConcurrentLevel // 最大并发量,越大速度越快 (非必须)
 ------------------------------------
-例如:
-第一种使用方法:
+例如
 -email
 21212121
 -key
 212121212
--pocJson
-C:\Users\xxx\Desktop\1.json
--proxy
-http://127.0.0.1:8082
--maxConcurrentLevel
-3
-
-第二种使用方法:
--email
-21212121
--key
-212121212
--url
-http://www.ip111.cn/
--pocJson
-C:\Users\xxx\Desktop\1.json
--proxy
-http://127.0.0.1:8082
--maxConcurrentLevel
-3
-
-第三种使用方法:
--email
-21212121
--key
-212121212
--file
-xxx/xxx/url.txt
 -pocJson
 C:\Users\xxx\Desktop\1.json
 -proxy
@@ -77,8 +48,11 @@ http://127.0.0.1:8082
 # TODO
 
 ```md
-1. json模式添加 body 正则
-2. 支持 json/go 这两种POC方法
-3. 首先判断 url的最后是不是/
+1. 支持 json/go 这两种POC方法
+2. 增强fofa
+3. 验证是否利用成功的速度过慢
+
+5. 解决扫描太快,但验证Poc太慢导致提前关闭的问题:remote error: tls: user canceled 
+json模式添加 body 正则
 ```
 
