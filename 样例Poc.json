@@ -1,6 +1,6 @@
 {
 "fofa":"body=\"hello world\"",
-"RequestPackage":{
+"Request":{
 		"Method": "GET",
 		 
 		"Uri": [
@@ -13,7 +13,7 @@
 		}
 },
 
-"ResponsePackage":{
+"Response":{
 		"Operation":"OR",
 		"Group":[
 				{

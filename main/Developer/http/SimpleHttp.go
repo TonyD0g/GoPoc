@@ -18,16 +18,16 @@ import (
 	"time"
 )
 
-func Send(pocStruct Format.PocStruct, queryResponse Fofa.QueryResponse, userInputDetectionURL *string, inputProxy string, maxConcurrentLevel int) {
+func Send(pocStruct Format.PocStruct, queryResponse Fofa.QueryResponse, userInputDetectionURL string, inputProxy string, maxConcurrentLevel int) {
 	client := SetProxy(inputProxy)
 	customRequestBody := []byte(pocStruct.RequestPackage.Body)
 	var urlsList []string
-	if userInputDetectionURL != nil {
-		if strings.HasPrefix(strings.ToLower(*userInputDetectionURL), "http://") || strings.HasPrefix(strings.ToLower(*userInputDetectionURL), "https://") {
-			urlsList = append(urlsList, *userInputDetectionURL)
+	if userInputDetectionURL != "" {
+		if strings.HasPrefix(strings.ToLower(userInputDetectionURL), "http://") || strings.HasPrefix(strings.ToLower(userInputDetectionURL), "https://") {
+			urlsList = append(urlsList, userInputDetectionURL)
 		} else {
 			// urlFile list
-			urlFile, err := os.Open(*userInputDetectionURL)
+			urlFile, err := os.Open(userInputDetectionURL)
 			if err != nil {
 				fmt.Println("can't open file:", err)
 				return
