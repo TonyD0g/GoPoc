@@ -6,7 +6,8 @@ import (
 	"reflect"
 )
 
-// ProcessPackages Used to process packages
+// ProcessPackages todo 解决自定义 header 头的问题
+// ProcessPackages 被用来处理包,包含请求包和响应包. 用处给未写明的header头字段赋予初值
 func ProcessPackages(procedureResponse *http.Request, pocStruct Format.PocStruct) {
 	isHasExist := make(map[string]bool)
 	reflectValue := reflect.ValueOf(pocStruct.RequestPackage.Header)
@@ -28,7 +29,6 @@ func ProcessPackages(procedureResponse *http.Request, pocStruct Format.PocStruct
 		"User-Agent":      "User-Agent",
 		"Accept-Encoding": "Accept-Encoding",
 		"Accept-Language": "Accept-Language",
-		"Cookie":          "Cookie",
 		"Accept":          "Accept",
 		"connection":      "connection",
 		"Content-Type":    "text/html; charset=UTF-8",

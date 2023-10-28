@@ -1,4 +1,4 @@
-# GoScanner
+# GoPoc
 
 基于 Json文件 、自定义脚本的快速验证扫描器，用于快速验证目标是否存在该漏洞。
 
@@ -34,6 +34,7 @@
 -pocJson // poc的json文件 (必须)
 -proxy // burpsuite 代理 (必须)
 -maxConcurrentLevel // 最大并发量,越大速度越快 (必须)
+-maxFofaSize	   // 最大检索数 (必须)
 ------------------------------------
 例如
 -email
@@ -55,7 +56,7 @@ http://127.0.0.1:8082
     // 必须,表明想要查找的fofa语句.
     "fofa":"body=\"hello world\"", 
    	// 请求包
-    "RequestPackage":{
+    "Request":{
         // 请求方法
 		"Method": "GET",
 		 // 请求路径,这里分别请求两个uri
@@ -69,7 +70,7 @@ http://127.0.0.1:8082
 		}
 	},
     // 响应包
-    "ResponsePackage":{
+    "Response":{
         // 定义多个Group之间的关系,有AND和OR这两种,其中AND是都满足漏洞才存在,OR是其中一个条件满足即可.
 		"Operation":"OR",
         // 判断条件
@@ -116,16 +117,13 @@ http://127.0.0.1:8082
 
 ```md
 1. 支持 json/go 这两种POC方法
-2. 增强fofa
-3. 解决【验证是否利用成功】的速度过慢的问题
+2. 解决【验证是否利用成功】的速度过慢的问题
 ```
 
 # 更新日志
 
 ```md
-1 从命令行输入更改为加载配置文件
-2 让header和body一样支持正则表达式
-3 速度优化
+2. 增强fofa
 ```
 
 

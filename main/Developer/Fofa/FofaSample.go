@@ -34,8 +34,8 @@ type QueryResponse struct {
 
 // Fofa a fofa client can be used to make queries
 type Fofa struct {
-	email []byte
-	key   []byte
+	Email []byte
+	Key   []byte
 	*http.Client
 }
 
@@ -93,8 +93,8 @@ func NewFofaClient(email, key []byte) *Fofa {
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	return &Fofa{
-		email: email,
-		key:   key,
+		Email: email,
+		Key:   key,
 		Client: &http.Client{
 			Transport: transCfg, // disable tls verify
 		},
@@ -136,8 +136,8 @@ func (ff *Fofa) QueryAsJSON(page uint, args ...[]byte) ([]byte, error) {
 
 	q = []byte(base64.StdEncoding.EncodeToString(query))
 	q = bytes.Join([][]byte{[]byte(defaultAPIUrl),
-		[]byte("email="), ff.email,
-		[]byte("&key="), ff.key,
+		[]byte("email="), ff.Email,
+		[]byte("&key="), ff.Key,
 		[]byte("&qbase64="), q,
 		[]byte("&fields="), fields,
 		[]byte("&page="), []byte(strconv.Itoa(int(page))),
@@ -184,7 +184,7 @@ func (ff *Fofa) QueryAsArray(page uint, args ...[]byte) (result Results, err err
 // UserInfo get user information
 func (ff *Fofa) UserInfo() (user *User, err error) {
 	user = new(User)
-	queryStr := strings.Join([]string{"https://fofa.so/api/v1/info/my?email=", string(ff.email), "&key=", string(ff.key)}, "")
+	queryStr := strings.Join([]string{"https://fofa.so/api/v1/info/my?email=", string(ff.Email), "&key=", string(ff.Key)}, "")
 
 	content, err := ff.Get(queryStr)
 

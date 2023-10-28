@@ -1,7 +1,7 @@
 package Format
 
 type PocStruct struct {
-	RequestPackage  RequestPackage  `json:"RequestPackage"`
-	ResponsePackage ResponsePackage `json:"ResponsePackage"`
+	RequestPackage  RequestPackage  `json:"Request"`
+	ResponsePackage ResponsePackage `json:"Response"`
 	Fofa            string          `json:"fofa"`
 }
