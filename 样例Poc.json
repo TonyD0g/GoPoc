@@ -9,8 +9,7 @@
 	
 
 		"Header":{
-			"Accept-Encoding":"gzip",
-			"Cookie":"121212"
+			"Accept-Encoding":"gzip"
 		}
 },
 
@@ -18,14 +17,10 @@
 		"Operation":"OR",
 		"Group":[
 				{
-					"Regexp":"(?s)^(.*?)no-cache",
 			        "Header":{
-			                            "Status": "200"      
-			            },
-			            
-			        "Body":[
-			        				    "Hello World"
-			            ]  
+			                          
+			                            "Content-Length":"4429"     
+			            }
 			    }
 			]
 }

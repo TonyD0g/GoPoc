@@ -6,7 +6,8 @@ type ResponsePackage struct {
 }
 
 type Group struct {
-	Regexp string   `json:"Regexp"`
-	Header Header   `json:"Header"`
-	Body   []string `json:"Body"`
+	Regexp string `json:"Regexp"`
+	//Header Header   `json:"Header"`
+	Header map[string]interface{} `json:"Header"`
+	Body   []string               `json:"Body"`
 }

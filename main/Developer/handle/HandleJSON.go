@@ -11,8 +11,8 @@ import (
 
 var pocStruct format2.PocStruct
 
-func TryToParsePocStruct(inputXml string) format2.PocStruct {
-	jsonData, err := ioutil.ReadFile(inputXml)
+func TryToParsePocStruct(inputJson string) format2.PocStruct {
+	jsonData, err := ioutil.ReadFile(inputJson)
 	if err != nil {
 		fmt.Println("[-] Error reading file:", err)
 		os.Exit(1)
@@ -26,7 +26,7 @@ func TryToParsePocStruct(inputXml string) format2.PocStruct {
 	return pocStruct
 }
 
-// TraversePath Traverse the Path in the PathList and initiate a request
+// TraversePath 遍历PathList中的Path,并添加到allReqPath,用于处理poc中同时出现多个uri的情况
 func TraversePath(requestPackage format2.RequestPackage, inputUrl string) []string {
 	var allReqPath []string
 	var i = 0
