@@ -1,10 +1,10 @@
 package Http
 
 import (
-	"Scanner/main/Developer/Fofa"
-	"Scanner/main/Developer/Format"
-	handle2 "Scanner/main/Developer/Handle"
-	"Scanner/main/Developer/Judge"
+	"GoPoc/main/Developer/Fofa"
+	"GoPoc/main/Developer/Format"
+	handle2 "GoPoc/main/Developer/Handle"
+	"GoPoc/main/Developer/Judge"
 	"bufio"
 	"bytes"
 	"context"
@@ -81,7 +81,6 @@ func CoreForSend(urlsList []string, pocStruct Format.PocStruct, inputProxy strin
 	client := SetProxy(inputProxy)
 	customRequestBody := []byte(pocStruct.RequestPackage.Body)
 	waitGroup := &sync.WaitGroup{}
-	//processedURLs := make(map[string]struct{}) // 用于存储已处理的URL
 
 	// 计算要划分的小的urlsList数量
 	numThreads := maxConcurrentLevel
@@ -89,7 +88,6 @@ func CoreForSend(urlsList []string, pocStruct Format.PocStruct, inputProxy strin
 		numThreads = len(urlsList)
 	}
 	urlsPerThread := len(urlsList) / numThreads
-	//var processedURLsMutex sync.Mutex
 	for i := 0; i < numThreads; i++ {
 		start := i * urlsPerThread
 		end := start + urlsPerThread
@@ -100,25 +98,16 @@ func CoreForSend(urlsList []string, pocStruct Format.PocStruct, inputProxy strin
 		subURLsList := urlsList[start:end]
 		waitGroup.Add(1)
 		go func(subURLs []string) {
-			defer waitGroup.Add(-1)
-			// Set a timeout for the request
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
-			defer cancel()
+			defer func() {
+				waitGroup.Add(-1)
+			}()
+
 			for _, tmpUrl := range subURLs {
 				allRequestPath := handle2.TraversePath(pocStruct.RequestPackage, tmpUrl)
 				requestCount := len(allRequestPath)
 
 				for tmpI := 0; tmpI < requestCount; tmpI++ {
 					tmpUrlForAllRequestPath := allRequestPath[tmpI]
-					//processedURLsMutex.Lock() // 使用互斥锁保护对 processedURLs 的访问
-					//// 检查URL是否已经处理过，如果处理过则跳过
-					//if _, exists := processedURLs[tmpUrlForAllRequestPath]; exists {
-					//	processedURLsMutex.Unlock()
-					//	continue
-					//}
-					//processedURLsMutex.Unlock()                         // 解锁 processedURLs
-					//processedURLs[tmpUrlForAllRequestPath] = struct{}{} // 标记URL已处理
-
 					parsedURL, err := url.Parse(tmpUrlForAllRequestPath)
 					if err != nil {
 						continue
@@ -128,15 +117,17 @@ func CoreForSend(urlsList []string, pocStruct Format.PocStruct, inputProxy strin
 					if err != nil {
 						continue
 					}
+					// Set a timeout for the request
+					ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 					handle2.ProcessPackages(procedureRequest, pocStruct)
 					procedureRequest = procedureRequest.WithContext(ctx)
 
 					// Send request and obtain response results
 					procedureResponse, err := client.Do(procedureRequest)
 					if err != nil {
+						cancel()
 						continue
 					}
-
 					if Judge.IsExploitSuccess(pocStruct, procedureResponse, customRequestBody) {
 						if splitURL := strings.Split(tmpUrlForAllRequestPath, "?"); len(splitURL) >= 2 {
 							params := strings.Split(splitURL[1], "&")
@@ -150,7 +141,7 @@ func CoreForSend(urlsList []string, pocStruct Format.PocStruct, inputProxy strin
 							fmt.Println("[+] [ " + parsedURL.Scheme + "://" + parsedURL.Host + "/" + " ]\tSuccess! The target may have this vulnerability")
 						}
 					}
-
+					cancel()
 				}
 
 			}

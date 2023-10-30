@@ -17,10 +17,9 @@
 		"Operation":"OR",
 		"Group":[
 				{
-			        "Header":{
-			                          
-			                            "Content-Length":"4429"     
-			            }
+			        "Body":[
+			        	"Hello World"
+			        ]
 			    }
 			]
 }

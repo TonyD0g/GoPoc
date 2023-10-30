@@ -1,7 +1,7 @@
 package Handle
 
 import (
-	"Scanner/main/Developer/Format"
+	"GoPoc/main/Developer/Format"
 	"math/rand"
 	"net/http"
 	"time"

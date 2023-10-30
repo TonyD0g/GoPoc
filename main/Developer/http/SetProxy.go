@@ -21,6 +21,9 @@ func SetProxy(inputProxy string) *http.Client {
 	// 创建一个使用自定义 Transport 的 HTTP 客户端
 	client := &http.Client{
 		Transport: transport,
+		CheckRedirect: func(*http.Request, []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
 	}
 	return client
 }

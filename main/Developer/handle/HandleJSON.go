@@ -1,7 +1,7 @@
 package Handle
 
 import (
-	format2 "Scanner/main/Developer/Format"
+	format2 "GoPoc/main/Developer/Format"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"

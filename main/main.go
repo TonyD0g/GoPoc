@@ -1,9 +1,9 @@
 package main
 
 import (
-	"Scanner/main/Developer/Handle"
-	"Scanner/main/Developer/Http"
-	"Scanner/main/Developer/Input"
+	"GoPoc/main/Developer/Handle"
+	"GoPoc/main/Developer/Http"
+	"GoPoc/main/Developer/Input"
 	"flag"
 	"fmt"
 	"os"
@@ -13,9 +13,10 @@ import (
 
 func main() {
 	fmt.Println("            ______          \n            | ___ \\         \n  __ _  ___ | |_/ /__   ___ \n / _` |/ _ \\|  __/ _ \\ / __|\n| (_| | (_) | | | (_) | (__ \n \\__, |\\___/\\_|  \\___/ \\___|\n  __/ |                     \n |___/                      ")
+	fmt.Println("Version 1.2")
 	args := os.Args
 	if args[1] != "-ini" {
-		flag.Usage()
+		fmt.Println("-ini C:/config.ini")
 		os.Exit(1)
 	}
 	inputIniFile := flag.String("ini", ".\\config.ini", "Input the ini file")

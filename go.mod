@@ -1,5 +1,5 @@
-module Scanner
+module GoPoc
 
-go 1.18
+go 1.19
 
 require github.com/buger/jsonparser v1.1.1
