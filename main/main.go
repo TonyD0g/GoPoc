@@ -13,7 +13,7 @@ import (
 
 func main() {
 	fmt.Println("            ______          \n            | ___ \\         \n  __ _  ___ | |_/ /__   ___ \n / _` |/ _ \\|  __/ _ \\ / __|\n| (_| | (_) | | | (_) | (__ \n \\__, |\\___/\\_|  \\___/ \\___|\n  __/ |                     \n |___/                      ")
-	fmt.Println("Version 1.2")
+	fmt.Println("Version 1.2.1")
 	args := os.Args
 	if args[1] != "-ini" {
 		fmt.Println("-ini C:/config.ini")
