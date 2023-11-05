@@ -2,6 +2,7 @@ package main
 
 import (
 	format2 "GoPoc/main/Developer/AllFormat"
+	"GoPoc/main/Developer/Core"
 	Handle "GoPoc/main/Developer/Handle"
 	"GoPoc/main/Developer/Http"
 	"GoPoc/main/Developer/Input"
@@ -16,7 +17,7 @@ import (
 
 func main() {
 	fmt.Println("            ______          \n            | ___ \\         \n  __ _  ___ | |_/ /__   ___ \n / _` |/ _ \\|  __/ _ \\ / __|\n| (_| | (_) | | | (_) | (__ \n \\__, |\\___/\\_|  \\___/ \\___|\n  __/ |                     \n |___/                      ")
-	fmt.Println("Version 1.3")
+	fmt.Println("Version 1.4")
 	args := os.Args
 	if len(args) == 1 {
 		fmt.Println("使用说明:	-ini C:/config.ini")
@@ -64,9 +65,9 @@ func main() {
 		urlsList = Http.SendForUrlOrFile(userInputDetectionURL)
 	}
 	if pocModule == 1 {
-		Http.CoreForSendByJson(urlsList, pocStruct, config["proxy"], maxConcurrentLevelInt)
+		Core.ForSendByJson(urlsList, pocStruct, config["proxy"], maxConcurrentLevelInt)
 	} else {
-		Http.CoreForSendByCode("poc", urlsList, config["proxy"], maxConcurrentLevelInt)
+		Core.ForSendByCode("poc", urlsList, config["proxy"], maxConcurrentLevelInt)
 	}
 	fmt.Println("\n[+] 扫描结束")
 }

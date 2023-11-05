@@ -3,20 +3,12 @@ package Http
 import (
 	"GoPoc/main/Developer/AllFormat"
 	"GoPoc/main/Developer/Fofa"
-	handle2 "GoPoc/main/Developer/Handle"
-	"GoPoc/main/Developer/Judge"
 	"bufio"
-	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
-	"net/url"
 	"os"
 	"strconv"
 	"strings"
-	"sync"
-	"time"
 )
 
 func SendForFofa(config map[string]string, pocStruct Format.PocStruct) []string {
@@ -75,126 +67,4 @@ func SendForUrlOrFile(userInputDetectionURL string) []string {
 		}
 	}
 	return urlsList
-}
-
-func CoreForSendByJson(urlsList []string, pocStruct Format.PocStruct, inputProxy string, maxConcurrentLevel int) {
-	client := SetProxy(inputProxy)
-	customRequestBody := []byte(pocStruct.RequestPackage.Body)
-	waitGroup := &sync.WaitGroup{}
-
-	// 计算要划分的小的urlsList数量
-	numThreads := maxConcurrentLevel
-	if numThreads > len(urlsList) {
-		numThreads = len(urlsList)
-	}
-	urlsPerThread := len(urlsList) / numThreads
-	for i := 0; i < numThreads; i++ {
-		start := i * urlsPerThread
-		end := start + urlsPerThread
-		if i == numThreads-1 {
-			end = len(urlsList)
-		}
-
-		subURLsList := urlsList[start:end]
-		waitGroup.Add(1)
-		go func(subURLs []string) {
-			defer func() {
-				waitGroup.Add(-1)
-			}()
-
-			for _, tmpUrl := range subURLs {
-				allRequestPath := handle2.TraversePath(pocStruct.RequestPackage, tmpUrl)
-				requestCount := len(allRequestPath)
-
-				for tmpI := 0; tmpI < requestCount; tmpI++ {
-					tmpUrlForAllRequestPath := allRequestPath[tmpI]
-					parsedURL, err := url.Parse(tmpUrlForAllRequestPath)
-					if err != nil {
-						continue
-					}
-					// Create an HTTP.Request object
-					procedureRequest, err := http.NewRequest(pocStruct.RequestPackage.Method, tmpUrlForAllRequestPath, bytes.NewBuffer(customRequestBody))
-					if err != nil {
-						continue
-					}
-					// Set a timeout for the request
-					ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-					handle2.ProcessPackages(procedureRequest, pocStruct)
-					procedureRequest = procedureRequest.WithContext(ctx)
-
-					// Send request and obtain response results
-					procedureResponse, err := client.Do(procedureRequest)
-					if err != nil {
-						cancel()
-						continue
-					}
-
-					if Judge.IsExploitSuccessByJson(pocStruct, procedureResponse, customRequestBody) {
-						if splitURL := strings.Split(tmpUrlForAllRequestPath, "?"); len(splitURL) >= 2 {
-							params := strings.Split(splitURL[1], "&")
-							encodedParams := make([]string, len(params))
-							for tmpI := range params {
-								p := strings.Split(params[tmpI], "=")
-								encodedParams[tmpI] = url.QueryEscape(p[0]) + "=" + url.QueryEscape(p[1])
-							}
-							fmt.Println("[+] [ " + parsedURL.Scheme + "://" + parsedURL.Host + "/" + strings.Join(encodedParams, "&") + " ]\tSuccess! The target may have this vulnerability")
-						} else {
-							fmt.Println("[+] [ " + parsedURL.Scheme + "://" + parsedURL.Host + "/" + " ]\tSuccess! The target may have this vulnerability")
-						}
-					}
-					cancel()
-				}
-
-			}
-		}(subURLsList)
-	}
-	waitGroup.Wait()
-}
-
-func CoreForSendByCode(pocOrExp string, urlsList []string, inputProxy string, maxConcurrentLevel int) {
-	client := SetProxy(inputProxy)
-	waitGroup := &sync.WaitGroup{}
-
-	// 计算要划分的小的urlsList数量
-	numThreads := maxConcurrentLevel
-	if numThreads > len(urlsList) {
-		numThreads = len(urlsList)
-	}
-	urlsPerThread := len(urlsList) / numThreads
-	for i := 0; i < numThreads; i++ {
-		start := i * urlsPerThread
-		end := start + urlsPerThread
-		if i == numThreads-1 {
-			end = len(urlsList)
-		}
-
-		subURLsList := urlsList[start:end]
-		waitGroup.Add(1)
-		go func(subURLs []string) {
-			defer func() {
-				waitGroup.Add(-1)
-			}()
-
-			for _, tmpUrl := range subURLs {
-				parsedURL, err := url.Parse(tmpUrl)
-				if err != nil {
-					continue
-				}
-				if Judge.IsExploitSuccessByCode(pocOrExp, tmpUrl, client) {
-					if splitURL := strings.Split(tmpUrl, "?"); len(splitURL) >= 2 {
-						params := strings.Split(splitURL[1], "&")
-						encodedParams := make([]string, len(params))
-						for tmpI := range params {
-							p := strings.Split(params[tmpI], "=")
-							encodedParams[tmpI] = url.QueryEscape(p[0]) + "=" + url.QueryEscape(p[1])
-						}
-						fmt.Println("[+] [ " + parsedURL.Scheme + "://" + parsedURL.Host + "/" + strings.Join(encodedParams, "&") + " ]\tSuccess! The target may have this vulnerability")
-					} else {
-						fmt.Println("[+] [ " + parsedURL.Scheme + "://" + parsedURL.Host + "/" + " ]\tSuccess! The target may have this vulnerability")
-					}
-				}
-			}
-		}(subURLsList)
-	}
-	waitGroup.Wait()
 }

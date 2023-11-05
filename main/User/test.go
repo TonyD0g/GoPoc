@@ -2,11 +2,9 @@ package User
 
 import (
 	"GoPoc/main/Developer/AllFormat"
-	"context"
-	"io"
+	"GoPoc/main/Developer/Http"
 	"net/http"
 	"strings"
-	"time"
 )
 
 var Json string
@@ -38,23 +36,14 @@ func init() {
 }`
 
 	Poc = func(hostInfo string, client *http.Client) bool {
-		// Create an HTTP.Request object
-		procedureRequest, err := http.NewRequest("GET", hostInfo+"/robots.txt", nil)
-		if err != nil {
-			return false
-		}
-		// Set a timeout for the request
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-		procedureRequest = procedureRequest.WithContext(ctx)
-		// Send request and obtain response results
-		procedureResponse, err := client.Do(procedureRequest)
-		if err != nil {
-			cancel()
-			return false
-		}
-		cancel()
-		bodyOfExecutionResults, err := io.ReadAll(procedureResponse.Body)
-		return strings.Contains(string(bodyOfExecutionResults), "Hello World")
+		var config Http.SetHttpConfig
+		config.TimeOut = 5
+		config.Method = "GET"
+		config.Body = nil
+		config.Uri = "/robots.txt"
+		config.Client = client
+		resp, err := Http.SendHttpRequest(hostInfo, config)
+		return err == nil && strings.Contains(resp.Body, "Hello World21211221")
 	}
 
 	Exp = func(expResult Format.ExpResult, client *http.Client) Format.ExpResult {
