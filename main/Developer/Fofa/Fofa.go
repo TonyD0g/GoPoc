@@ -1,7 +1,7 @@
 package Fofa
 
 import (
-	"GoPoc/main/Developer/Format"
+	"GoPoc/main/Developer/AllFormat"
 	"bytes"
 	"encoding/base64"
 	"fmt"

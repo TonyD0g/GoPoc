@@ -1,7 +1,7 @@
 package Handle
 
 import (
-	"GoPoc/main/Developer/Format"
+	"GoPoc/main/Developer/AllFormat"
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"

@@ -1,29 +1,22 @@
 {
-"fofa":"body=\"hello world\"",
-"Request":{
-		"Method": "GET",
-		 
-		"Uri": [
-		      "/robots.txt"
-	   			],
-	
-
-		"Header":{
-			"Accept-Encoding":"gzip"
-		}
-},
-
-"Response":{
-		"Operation":"OR",
-		"Group":[
-				{
-			        "Body":[
-			        	"Hello World"
-			        ]
-			    }
-			]
+    "fofa": "body=\"hello world\"",
+    "Request": {
+        "Method": "GET",
+        "Uri": [
+            "/robots.txt"
+        ],
+        "Header": {
+            "Accept-Encoding": "gzip"
+        }
+    },
+    "Response": {
+        "Operation": "OR",
+        "Group": [
+            {
+                "Body": [
+                    "Hello World"
+                ]
+            }
+        ]
+    }
 }
-
-}
-
-

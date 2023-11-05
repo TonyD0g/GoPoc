@@ -1,8 +1,8 @@
 package Http
 
 import (
+	"GoPoc/main/Developer/AllFormat"
 	"GoPoc/main/Developer/Fofa"
-	"GoPoc/main/Developer/Format"
 	handle2 "GoPoc/main/Developer/Handle"
 	"GoPoc/main/Developer/Judge"
 	"bufio"
@@ -47,7 +47,7 @@ func SendForFofa(config map[string]string, pocStruct Format.PocStruct) []string 
 
 func SendForUrlOrFile(userInputDetectionURL string) []string {
 	var urlsList []string
-	if strings.HasPrefix(strings.ToLower(userInputDetectionURL), "http://") || strings.HasPrefix(strings.ToLower(userInputDetectionURL), "https://") {
+	if strings.HasPrefix(strings.ToLower(userInputDetectionURL), "Http://") || strings.HasPrefix(strings.ToLower(userInputDetectionURL), "https://") {
 		urlsList = append(urlsList, userInputDetectionURL)
 	} else {
 		// urlFile list
@@ -77,7 +77,7 @@ func SendForUrlOrFile(userInputDetectionURL string) []string {
 	return urlsList
 }
 
-func CoreForSend(urlsList []string, pocStruct Format.PocStruct, inputProxy string, maxConcurrentLevel int) {
+func CoreForSendByJson(urlsList []string, pocStruct Format.PocStruct, inputProxy string, maxConcurrentLevel int) {
 	client := SetProxy(inputProxy)
 	customRequestBody := []byte(pocStruct.RequestPackage.Body)
 	waitGroup := &sync.WaitGroup{}
@@ -128,7 +128,8 @@ func CoreForSend(urlsList []string, pocStruct Format.PocStruct, inputProxy strin
 						cancel()
 						continue
 					}
-					if Judge.IsExploitSuccess(pocStruct, procedureResponse, customRequestBody) {
+
+					if Judge.IsExploitSuccessByJson(pocStruct, procedureResponse, customRequestBody) {
 						if splitURL := strings.Split(tmpUrlForAllRequestPath, "?"); len(splitURL) >= 2 {
 							params := strings.Split(splitURL[1], "&")
 							encodedParams := make([]string, len(params))
@@ -144,6 +145,54 @@ func CoreForSend(urlsList []string, pocStruct Format.PocStruct, inputProxy strin
 					cancel()
 				}
 
+			}
+		}(subURLsList)
+	}
+	waitGroup.Wait()
+}
+
+func CoreForSendByCode(pocOrExp string, urlsList []string, inputProxy string, maxConcurrentLevel int) {
+	client := SetProxy(inputProxy)
+	waitGroup := &sync.WaitGroup{}
+
+	// 计算要划分的小的urlsList数量
+	numThreads := maxConcurrentLevel
+	if numThreads > len(urlsList) {
+		numThreads = len(urlsList)
+	}
+	urlsPerThread := len(urlsList) / numThreads
+	for i := 0; i < numThreads; i++ {
+		start := i * urlsPerThread
+		end := start + urlsPerThread
+		if i == numThreads-1 {
+			end = len(urlsList)
+		}
+
+		subURLsList := urlsList[start:end]
+		waitGroup.Add(1)
+		go func(subURLs []string) {
+			defer func() {
+				waitGroup.Add(-1)
+			}()
+
+			for _, tmpUrl := range subURLs {
+				parsedURL, err := url.Parse(tmpUrl)
+				if err != nil {
+					continue
+				}
+				if Judge.IsExploitSuccessByCode(pocOrExp, tmpUrl, client) {
+					if splitURL := strings.Split(tmpUrl, "?"); len(splitURL) >= 2 {
+						params := strings.Split(splitURL[1], "&")
+						encodedParams := make([]string, len(params))
+						for tmpI := range params {
+							p := strings.Split(params[tmpI], "=")
+							encodedParams[tmpI] = url.QueryEscape(p[0]) + "=" + url.QueryEscape(p[1])
+						}
+						fmt.Println("[+] [ " + parsedURL.Scheme + "://" + parsedURL.Host + "/" + strings.Join(encodedParams, "&") + " ]\tSuccess! The target may have this vulnerability")
+					} else {
+						fmt.Println("[+] [ " + parsedURL.Scheme + "://" + parsedURL.Host + "/" + " ]\tSuccess! The target may have this vulnerability")
+					}
+				}
 			}
 		}(subURLsList)
 	}

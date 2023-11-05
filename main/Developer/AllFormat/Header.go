@@ -6,5 +6,4 @@ type Header struct {
 	Accept         string `json:"Accept"`
 	Host           string `json:"Host"`
 	ContentType    string `json:"Content-Type"`
-	// 	Cookie         string `json:"Cookie"`
 }

@@ -24,6 +24,8 @@
 
 # 使用教程
 
+- 请到此处下载发行版：[releases](https://github.com/TonyD0g/GoPoc/releases)
+
 - 程序使用
 
 ```md
@@ -53,6 +55,13 @@ http://127.0.0.1:8082
 -maxConcurrentLevel
 3
 ```
+
+- 书写规范:	
+
+  ```md
+  1. 使用代码模式时必须存在 Poc/Exp 函数,如果是使用json模式不写 Poc/Exp 函数
+  2. json 中必须存在 fofa语句
+  ```
 
 - Poc 编写
 
@@ -116,18 +125,10 @@ http://127.0.0.1:8082
 2. POC 易编写,只需要会看http响应包和http回显包即可
 ```
 
-
-
 # TODO
 
 ```md
-1. 支持 json/go 这两种POC方法
-```
-
-# 更新日志
-
-```md
-
+进一步封装代码模式
 ```
 
 

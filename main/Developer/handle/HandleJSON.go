@@ -1,24 +1,17 @@
 package Handle
 
 import (
-	format2 "GoPoc/main/Developer/Format"
+	format2 "GoPoc/main/Developer/AllFormat"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 )
 
 var pocStruct format2.PocStruct
 
-func TryToParsePocStruct(inputJson string) format2.PocStruct {
-	jsonData, err := ioutil.ReadFile(inputJson)
-	if err != nil {
-		fmt.Println("[-] Error reading file:", err)
-		os.Exit(1)
-	}
-
-	err = json.Unmarshal(jsonData, &pocStruct)
+func TryToParsePocStruct(jsonData string) format2.PocStruct {
+	err := json.Unmarshal([]byte(jsonData), &pocStruct)
 	if err != nil {
 		fmt.Println("[-] Error unmarshal Json:", err)
 		os.Exit(1)
