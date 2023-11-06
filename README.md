@@ -1,10 +1,11 @@
 # GoPoc
 
-基于 Json文件 、自定义脚本的快速验证扫描器，用于快速验证目标是否存在该漏洞。
+基于 Json 、自定义Go脚本的快速验证扫描器，用于快速验证目标是否存在该漏洞。
 
 使用场景：
 
-你是否发现一个新漏洞但苦于无法快速编写成脚本？这款工具可能适合你，只要你能看http请求包/响应包就能上手写poc。
+- 你是否发现一个新漏洞但苦于无法快速编写成脚本？这款工具可能适合你，只要你能看http请求包/响应包就能上手写poc。
+- 想更高深的利用？比如文件上传写冰蝎、哥斯拉。那么代码模式适合你。
 
 # 免责声明
 
@@ -24,99 +25,215 @@
 
 # 使用教程
 
-- 请到此处下载发行版：[releases](https://github.com/TonyD0g/GoPoc/releases)
+- 请到此处下载发行版：[releases](https://github.com/TonyD0g/GoPoc/releases) / 或 **下载源码** 使用 (使用代码模式时建议下载源码)
 
 - 程序使用
 
 ```md
-第1步: 创建一个配置文件,比如 config.txt
+第1步: 创建一个配置文件,比如 config.ini
 第2步:使用 -ini 参数加载配置文件.
 ------------------------------------
-config.txt内容如下:
+config.ini内容如下:
 
 -email // fofa的email (必须)
 -key // fofa的key (必须)
 -url // 扫单个url (非必须)
 -file // 扫url文件中的每一个url (非必须)
--pocJson // poc的json文件 (必须)
--proxy // burpsuite 代理 (必须)
--maxConcurrentLevel // 最大并发量,越大速度越快 (必须)
--maxFofaSize	   // 最大检索数 (必须)
+-vul // poc/exp文件,文件后缀为.go (必须)
+-mod // 指定poc/exp这两种模式 (必须)
+-proxy // burpsuite 代理,用于方便写poc/exp (必须)
+-maxConcurrentLevel // 最大并发量,越大扫描速度越快 (必须)
+-maxFofaSize	   // fofa最大检索数 (必须)
 ------------------------------------
 例如
 -email
-21212121
+xxxxxxxxxxx@gamil.com
 -key
-212121212
--pocJson
-C:\Users\xxx\Desktop\1.json
+fdgdfhfgdhdfgdhfghfdg
+-vul
+D:\Coding\Github\GoPoc\main\User\test.go
+-mod
+poc
+-url
+http://127.0.0.1
 -proxy
 http://127.0.0.1:8082
 -maxConcurrentLevel
 3
+-maxFofaSize
+300
 ```
+
+- 两种利用模式：
+
+  - json模式
+
+    新建一个 文件名.go文件，输入以下内容：
+
+  ```go
+  package User
+  
+  import (
+  	"GoPoc/main/Developer/AllFormat"
+  	"GoPoc/main/Developer/Http"
+  	"net/http"
+  	"strings"
+  )
+  
+  var Json string
+  var Poc func(hostInfo string, client *http.Client) bool
+  var Exp func(expResult Format.ExpResult, client *http.Client) Format.ExpResult
+  
+  func init() {
+  	// 有代码使用代码,无代码使用json
+  	// 如果存在代码,可以不写Json格式(即Json格式有架构,但内容为空).但必须存在 fofa语句
+  	// 此处的json只是说明json的使用方式,与代码模式并无关联
+  	Json = `{
+      // 必须,表明想要查找的fofa语句.
+      "fofa":"body=\"hello world\"", 
+     	// 请求包
+      "Request":{
+          // 请求方法
+  		"Method": "GET",
+  		 // 请求路径,这里分别请求两个uri
+  		"Uri": [
+  		      "/robots.txt",
+                 "/hello.txt"
+  	   			],
+  		// 自定义 header 头
+  		"Header":{
+  			"Accept-Encoding":"gzip"
+  		}
+  	},
+      // 响应包
+      "Response":{
+          // 定义多个Group之间的关系,有AND和OR这两种,其中AND是都满足漏洞才存在,OR是其中一个条件满足即可.
+  		"Operation":"OR",
+          // 判断条件
+  		"Group":[
+              	 // 条件1
+  				{
+                      // 支持正则表达式
+                       "Regexp": ".*?",
+  			        "Header":{
+                          				// 状态码
+  			                            "Status": "200"      
+  			            },
+  			        // response Body ,同样是支持多个Body,当都符合时为True
+  			        "Body":[
+  			        				    "Hello World",
+                          				 "wahaha"
+  			            ]  
+  			    },
+              	 // 条件2
+             		 {
+  			        "Header":{
+                          				// 状态码
+  			                            "Status": "200"      
+  			            }
+  			    }
+  			]
+  
+  }
+  }`
+  }
+  
+  ```
+
+  
+
+  - go
+
+    在 main\User 文件夹下新建一个 文件名.go文件，输入以下内容：
+
+  ```go
+  package User
+  
+  import (
+  	"GoPoc/main/Developer/AllFormat"
+  	"GoPoc/main/Developer/Http"
+  	"net/http"
+  	"strings"
+  )
+  
+  var Json string
+  var Poc func(hostInfo string, client *http.Client) bool
+  var Exp func(expResult Format.ExpResult, client *http.Client) Format.ExpResult
+  
+  // Poc 编写,以 dvwa 靶场的sql注入为例
+  func init() {
+  	// 有代码使用代码,无代码使用json
+  	// 如果存在代码,可以不写Json格式(即Json格式有架构,但内容为空).但必须存在 fofa语句
+  	// 此处的json只是说明json的使用方式,与代码模式并无关联
+  	Json = `{
+      // 必须,表明想要查找的fofa语句.
+      "fofa":"body=\"hello world\"", 
+     	// 请求包
+      "Request":{
+          
+  	},
+      // 响应包
+      "Response":{
+  	}
+  }`
+  	// 建议: 函数名+随机命名
+  	sendLoginByToken455445 := func(hostInfo string, client *http.Client) (Format.CustomResponseFormat, error) {
+  		config := Http.NewHttpConfig()
+  		config.Header["Cookie"] = "security=low; PHPSESSID=1abcbe73869e90560e9061ca636c813e" // (非强制) 自定义Header头
+  		config.Header["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"
+  		config.TimeOut = 5    // (非强制) 如果不写的话默认值为 5秒
+  		config.Method = "GET" // (非强制) 如果不写的话默认值为 GET方式
+  		//config.Body = `123` 			// (非强制) 如果不写的话默认值为 ""
+  		config.Uri = "/dvwa/index.php" // (非强制) 如果不写的话默认值为 ""
+  		config.Client = client         // (强制) 因为这个 client 挂上了burpSuite代理,如果你使用自己的client可能会因为没有挂代理而无法得知利用过程,会不好写poc/exp
+  		return Http.SendHttpRequest(hostInfo, config)
+  	}
+  
+  	// 建议: 函数名+随机命名
+  	sendSqlPayload5251552 := func(hostInfo string, client *http.Client) (Format.CustomResponseFormat, error) {
+  		config := Http.NewHttpConfig()
+  		config.Header["Cookie"] = "security=low; PHPSESSID=1abcbe73869e90560e9061ca636c813e"
+  		config.Uri = "/dvwa/vulnerabilities/sqli/?id=%27&Submit=Submit#"
+  		config.Client = client
+  		return Http.SendHttpRequest(hostInfo, config)
+  	}
+  
+  	// 如果使用代码模式, Poc函数为必须,其中的参数固定
+  	Poc = func(hostInfo string, client *http.Client) bool {
+  		resp, err := sendLoginByToken455445(hostInfo, client)
+  		if err != nil {
+  			return false
+  		}
+  		if !strings.Contains(resp.Body, "Welcome to Damn") {
+  			return false
+  		}
+  		resp, err = sendSqlPayload5251552(hostInfo, client)
+  		return err == nil && strings.Contains(resp.Body, "You have an error in your SQL syntax;")
+  	}
+  
+  	// 如果使用代码模式, Exp函数为必须,其中的参数固定
+  	// Exp 你可以尝试自己写一下:
+  	Exp = func(expResult Format.ExpResult, client *http.Client) Format.ExpResult {
+  		return expResult
+  	}
+  }
+  
+  ```
+
+  
 
 - 书写规范:	
 
   ```md
-  1. 使用代码模式时必须存在 Poc/Exp 函数,如果是使用json模式不写 Poc/Exp 函数
-  2. json 中必须存在 fofa语句
+  1. 使用go模式时必须存在 Poc/Exp 函数,如果是使用json模式不写 Poc/Exp 函数
+  2. 如果存在代码,可以不写Json格式(即Json格式有架构,但内容为空).但必须存在 fofa语句
+  3. json 模式只支持 poc,不支持 exp
+  4. json 模式能书写的复杂度不如 go 模式,如果想更深层次利用请使用 go 模式
   ```
 
-- Poc 编写
+# 效果展示：
 
-```json
-{
-    // 必须,表明想要查找的fofa语句.
-    "fofa":"body=\"hello world\"", 
-   	// 请求包
-    "Request":{
-        // 请求方法
-		"Method": "GET",
-		 // 请求路径,这里分别请求两个uri
-		"Uri": [
-		      "/robots.txt",
-               "/hello.txt"
-	   			],
-		// 自定义 header 头
-		"Header":{
-			"Accept-Encoding":"gzip"
-		}
-	},
-    // 响应包
-    "Response":{
-        // 定义多个Group之间的关系,有AND和OR这两种,其中AND是都满足漏洞才存在,OR是其中一个条件满足即可.
-		"Operation":"OR",
-        // 判断条件
-		"Group":[
-            	 // 条件1
-				{
-                    // 支持正则表达式
-                     "Regexp": ".*?",
-			        "Header":{
-                        				// 状态码
-			                            "Status": "200"      
-			            },
-			        // response Body ,同样是支持多个Body,当都符合时为True
-			        "Body":[
-			        				    "Hello World",
-                        				 "wahaha"
-			            ]  
-			    },
-            	 // 条件2
-           		 {
-			        "Header":{
-                        				// 状态码
-			                            "Status": "200"      
-			            }
-			    }
-			]
-
-}
-}
-```
-
-
+![演示](pic\演示.gif)
 
 # 特性
 
@@ -128,9 +245,5 @@ http://127.0.0.1:8082
 # TODO
 
 ```md
-进一步封装代码模式
+
 ```
-
-
-
-【建议先别二开，代码写的很狗屎，先让我简单优化下。】

@@ -57,7 +57,7 @@ func ForSendByJson(urlsList []string, pocStruct Format.PocStruct, inputProxy str
 					}
 					// Set a timeout for the request
 					ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-					handle2.ProcessPackages(procedureRequest, pocStruct)
+					handle2.ProcessPackagesForJson(procedureRequest, pocStruct)
 					procedureRequest = procedureRequest.WithContext(ctx)
 
 					// Send request and obtain response results

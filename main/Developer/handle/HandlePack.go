@@ -7,8 +7,8 @@ import (
 	"time"
 )
 
-// ProcessPackages 被用来处理包,包含请求包和响应包. 用处给未写明的header头字段赋予初值
-func ProcessPackages(procedureRequest *http.Request, pocStruct Format.PocStruct) {
+// ProcessPackagesForJson 被用来处理包,包含请求包和响应包. 用处给未写明的header头字段赋予初值
+func ProcessPackagesForJson(procedureRequest *http.Request, pocStruct Format.PocStruct) {
 	// 随机 UA
 	userAgents := []string{
 		"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0",

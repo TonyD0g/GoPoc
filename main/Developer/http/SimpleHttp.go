@@ -39,7 +39,7 @@ func SendForFofa(config map[string]string, pocStruct Format.PocStruct) []string 
 
 func SendForUrlOrFile(userInputDetectionURL string) []string {
 	var urlsList []string
-	if strings.HasPrefix(strings.ToLower(userInputDetectionURL), "Http://") || strings.HasPrefix(strings.ToLower(userInputDetectionURL), "https://") {
+	if strings.HasPrefix(strings.ToLower(userInputDetectionURL), "http://") || strings.HasPrefix(strings.ToLower(userInputDetectionURL), "https://") {
 		urlsList = append(urlsList, userInputDetectionURL)
 	} else {
 		// urlFile list
