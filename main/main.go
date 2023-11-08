@@ -17,7 +17,7 @@ import (
 
 func main() {
 	fmt.Println("            ______          \n            | ___ \\         \n  __ _  ___ | |_/ /__   ___ \n / _` |/ _ \\|  __/ _ \\ / __|\n| (_| | (_) | | | (_) | (__ \n \\__, |\\___/\\_|  \\___/ \\___|\n  __/ |                     \n |___/                      ")
-	fmt.Println("Version 1.5")
+	fmt.Println("Version 1.5.1")
 	args := os.Args
 	if len(args) == 1 {
 		fmt.Println("使用说明:	-ini C:/config.ini\nconfig.ini内容如下:\n\n-email // fofa的email (必须)\n-key // fofa的key (必须)\n-url // 扫单个url (非必须)\n-file // 扫url文件中的每一个url (非必须)\n-vul // poc/exp文件,文件后缀为.go (必须)\n-mod // 指定poc/exp这两种模式 (必须)\n-proxy // burpsuite 代理,用于方便写poc/exp (必须)\n-maxConcurrentLevel // 最大并发量,越大扫描速度越快 (必须)\n-maxFofaSize\t   // fofa最大检索数 (必须)")
