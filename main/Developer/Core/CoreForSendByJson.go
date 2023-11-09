@@ -4,7 +4,6 @@ import (
 	Format "GoPoc/main/Developer/AllFormat"
 	handle2 "GoPoc/main/Developer/Handle"
 	"GoPoc/main/Developer/Http"
-	"GoPoc/main/Developer/Judge"
 	"bytes"
 	"context"
 	"fmt"
@@ -67,7 +66,7 @@ func ForSendByJson(urlsList []string, pocStruct Format.PocStruct, inputProxy str
 						continue
 					}
 
-					if Judge.IsExploitSuccessByJson(pocStruct, procedureResponse, customRequestBody) {
+					if IsExploitSuccessByJson(pocStruct, procedureResponse, customRequestBody) {
 						if splitURL := strings.Split(tmpUrlForAllRequestPath, "?"); len(splitURL) >= 2 {
 							params := strings.Split(splitURL[1], "&")
 							encodedParams := make([]string, len(params))

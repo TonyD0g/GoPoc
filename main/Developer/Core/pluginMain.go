@@ -1,4 +1,4 @@
-package LoadingGo
+package Core
 
 import (
 	"GoPoc/main/User"
