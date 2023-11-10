@@ -25,16 +25,14 @@
 
 # 使用教程
 
-- 请到此处下载发行版：[releases](https://github.com/TonyD0g/GoPoc/releases) / 或 **下载源码** 使用 (使用代码模式时建议下载源码)
-
-- 程序使用
+- 1. 请 **下载源码** 使用 
+  2. 使用ide打开项目，比如 goland
+  3. 在 User 包下新建一个 "文件名.go"
+  4. 创建一个配置文件,比如 config.ini
+  5. 使用 -ini 参数加载配置文件.
+- config.ini 内容如下：
 
 ```md
-第1步: 创建一个配置文件,比如 config.ini
-第2步:使用 -ini 参数加载配置文件.
-------------------------------------
-config.ini内容如下:
-
 -email // fofa的email (必须)
 -key // fofa的key (必须)
 -url // 扫单个url (非必须)
@@ -68,7 +66,7 @@ http://127.0.0.1:8082
 
   - json模式
 
-    新建一个 文件名.go文件，输入以下内容：
+    新建一个 **文件名.go** 文件，输入以下内容：
 
   ```go
   package User
@@ -142,9 +140,9 @@ http://127.0.0.1:8082
 
   
 
-  - go
+  - go 模式
 
-    在 main\User 文件夹下新建一个 文件名.go文件，输入以下内容：
+    在 main\User 文件夹下新建一个 **文件名.go** 文件，输入以下内容：
 
   ```go
   package User

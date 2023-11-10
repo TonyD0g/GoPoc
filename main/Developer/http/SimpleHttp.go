@@ -3,9 +3,9 @@ package Http
 import (
 	"GoPoc/main/Developer/AllFormat"
 	"GoPoc/main/Developer/Fofa"
+	"GoPoc/main/Log"
 	"bufio"
 	"encoding/json"
-	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -14,16 +14,14 @@ import (
 func SendForFofa(config map[string]string, pocStruct Format.PocStruct) []string {
 	maxFofaSizeInt, err := strconv.Atoi(config["maxFofaSize"])
 	if err != nil {
-		fmt.Printf("maxFofaSize 并不是一个有效数字\n")
-		os.Exit(1)
+		Log.Log.Fatal("maxFofaSize 并不是一个有效数字\n")
 	}
 
 	var urlsList []string
 	var queryResponse Fofa.QueryResponse
 	err = json.Unmarshal(Fofa.SearchReturnByte(config, pocStruct, maxFofaSizeInt), &queryResponse)
 	if err != nil {
-		fmt.Println("Failed to parse JSON:", err)
-		os.Exit(1)
+		Log.Log.Fatal("Failed to parse JSON:", err)
 	}
 
 	for _, tmpOutcome := range queryResponse.Results {
@@ -33,7 +31,7 @@ func SendForFofa(config map[string]string, pocStruct Format.PocStruct) []string 
 			urlsList = append(urlsList, tmpOutcome[1].(string))
 		}
 	}
-	fmt.Printf("[+] 此 fofa 语句: %v 查询到: %v 条,你想搜索 %v 条\n", queryResponse.Query, queryResponse.Size, config["maxFofaSize"])
+	Log.Log.Println("[+] 此 fofa 语句: %v 查询到: %v 条,你想搜索 %v 条\n", queryResponse.Query, queryResponse.Size, config["maxFofaSize"])
 	return urlsList
 }
 
@@ -45,14 +43,12 @@ func SendForUrlOrFile(userInputDetectionURL string) []string {
 		// urlFile list
 		urlFile, err := os.Open(userInputDetectionURL)
 		if err != nil {
-			fmt.Println("can't open file:", err)
-			os.Exit(1)
+			Log.Log.Fatal("can't open file:", err)
 		}
 		defer func(file *os.File) {
 			err = file.Close()
 			if err != nil {
-				fmt.Println("can't close file:", err)
-				os.Exit(1)
+				Log.Log.Fatal("can't close file:", err)
 			}
 		}(urlFile)
 

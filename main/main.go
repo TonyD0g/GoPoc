@@ -5,7 +5,7 @@ import (
 	"GoPoc/main/Developer/Core"
 	Handle "GoPoc/main/Developer/Handle"
 	"GoPoc/main/Developer/Http"
-	"GoPoc/main/Developer/Input"
+	"GoPoc/main/Log"
 	"GoPoc/main/User"
 	"flag"
 	"fmt"
@@ -26,7 +26,7 @@ func main() {
 	}
 	inputIniFile := flag.String("ini", ".\\config.ini", "Input the ini file")
 	flag.Parse()
-	config := Input.HandleIni(*inputIniFile)
+	config := Handle.HandleIni(*inputIniFile)
 
 	// Determine whether the number of parameters is correct
 	if !strings.Contains(config["email"], "@") || config["key"] == "" || config["maxFofaSize"] == "" {
@@ -42,10 +42,10 @@ func main() {
 	} else {
 		userInputDetectionURL = ""
 	}
-
+	Log.NewLogger().Init()
 	maxConcurrentLevelInt, err := strconv.Atoi(config["maxConcurrentLevel"])
 	if err != nil {
-		fmt.Println("The maximum concurrency you entered is not a number!", err)
+		Log.Log.Fatal("The maximum concurrency you entered is not a number!", err)
 	}
 	// 两种 poc模式,第一种为json格式,第二种为代码格式
 	var pocStruct format2.PocStruct
@@ -55,7 +55,7 @@ func main() {
 	}
 
 	var urlsList []string
-	fmt.Println("[+] 扫描开始,记得挂全局socks代理! :")
+	Log.Log.Println("[+] 扫描开始,记得挂全局socks代理! :")
 	// 发包模式1 基于 fofa 搜索
 	if userInputDetectionURL == "" {
 		urlsList = Http.SendForFofa(config, pocStruct)
@@ -68,5 +68,5 @@ func main() {
 	} else {
 		Core.ForSendByCode(config["mod"], urlsList, config["proxy"], maxConcurrentLevelInt)
 	}
-	fmt.Println("\n[+] 扫描结束")
+	Log.Log.Println("\n[+] 扫描结束")
 }

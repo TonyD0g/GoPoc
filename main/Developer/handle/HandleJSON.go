@@ -2,9 +2,8 @@ package Handle
 
 import (
 	format2 "GoPoc/main/Developer/AllFormat"
+	"GoPoc/main/Log"
 	"encoding/json"
-	"fmt"
-	"os"
 	"strings"
 )
 
@@ -13,8 +12,7 @@ var pocStruct format2.PocStruct
 func TryToParsePocStruct(jsonData string) format2.PocStruct {
 	err := json.Unmarshal([]byte(jsonData), &pocStruct)
 	if err != nil {
-		fmt.Println("[-] Error unmarshal Json:", err)
-		os.Exit(1)
+		Log.Log.Fatal("[-] Error unmarshal Json:", err)
 	}
 	return pocStruct
 }

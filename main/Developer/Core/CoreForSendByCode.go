@@ -3,8 +3,8 @@ package Core
 import (
 	Format "GoPoc/main/Developer/AllFormat"
 	"GoPoc/main/Developer/Http"
+	"GoPoc/main/Log"
 	"GoPoc/main/User"
-	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -49,9 +49,9 @@ func ForSendByCode(pocOrExp string, urlsList []string, inputProxy string, maxCon
 							p := strings.Split(params[tmpI], "=")
 							encodedParams[tmpI] = url.QueryEscape(p[0]) + "=" + url.QueryEscape(p[1])
 						}
-						fmt.Println("[+] [ " + parsedURL.Scheme + "://" + parsedURL.Host + "/" + strings.Join(encodedParams, "&") + " ]\tSuccess! The target may have this vulnerability")
+						Log.Log.Println("[+] [ " + parsedURL.Scheme + "://" + parsedURL.Host + "/" + strings.Join(encodedParams, "&") + " ]\tSuccess! The target may have this vulnerability")
 					} else {
-						fmt.Println("[+] [ " + parsedURL.Scheme + "://" + parsedURL.Host + "/" + " ]\tSuccess! The target may have this vulnerability")
+						Log.Log.Println("[+] [ " + parsedURL.Scheme + "://" + parsedURL.Host + "/" + " ]\tSuccess! The target may have this vulnerability")
 					}
 				}
 			}
@@ -70,7 +70,7 @@ func IsExploitSuccessByCode(pocOrExp, hostInfo string, client *http.Client) bool
 		expResult.Output = ""
 		expResult = User.Exp(expResult, client)
 		if expResult.Success {
-			fmt.Println(expResult.Output)
+			Log.Log.Println(expResult.Output)
 			return true
 		}
 		return false

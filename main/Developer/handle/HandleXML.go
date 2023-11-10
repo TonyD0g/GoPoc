@@ -2,23 +2,20 @@ package Handle
 
 import (
 	"GoPoc/main/Developer/AllFormat"
+	"GoPoc/main/Log"
 	"encoding/xml"
-	"fmt"
 	"io/ioutil"
-	"os"
 )
 
 func ProcessXML(inputXml string) Format.RequestPackage {
 	xmlData, err := ioutil.ReadFile(inputXml)
 	if err != nil {
-		fmt.Println("[-] Error reading file:", err)
-		os.Exit(1)
+		Log.Log.Fatal("[-] Error reading file:", err)
 	}
 	var requestPackage Format.RequestPackage
 	err = xml.Unmarshal(xmlData, &requestPackage)
 	if err != nil {
-		fmt.Println("[-] Error unmarshalling XML:", err)
-		os.Exit(1)
+		Log.Log.Fatal("[-] Error unmarshalling XML:", err)
 	}
 	return requestPackage
 }

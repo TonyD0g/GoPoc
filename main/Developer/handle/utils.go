@@ -1,8 +1,8 @@
-package Input
+package Handle
 
 import (
+	"GoPoc/main/Log"
 	"bufio"
-	"fmt"
 	"os"
 	"strings"
 )
@@ -10,14 +10,12 @@ import (
 func HandleIni(fileName string) map[string]string {
 	file, err := os.Open(fileName)
 	if err != nil {
-		fmt.Printf("打开文件失败：%v\n", err)
-		os.Exit(1)
+		Log.Log.Fatal("打开文件失败：%v\n", err)
 	}
 	defer func(file *os.File) {
 		err = file.Close()
 		if err != nil {
-			fmt.Printf("关闭文件失败：%v\n", err)
-			os.Exit(1)
+			Log.Log.Fatal("关闭文件失败：%v\n", err)
 		}
 	}(file)
 

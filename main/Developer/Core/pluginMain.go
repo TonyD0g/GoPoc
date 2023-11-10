@@ -1,13 +1,12 @@
 package Core
 
 import (
+	"GoPoc/main/Log"
 	"GoPoc/main/User"
-	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
 	"log"
-	"os"
 )
 
 // LoadPlugin 有代码用代码,无代码用json. 模式1为json格式,模式2为代码格式
@@ -47,8 +46,7 @@ func LoadPlugin(pocName string) int {
 	} else if User.Json != "" {
 		return 1
 	} else {
-		fmt.Println("[-] poc文件存在问题,请检查")
-		os.Exit(1)
+		Log.Log.Fatal("[-] poc文件存在问题,请检查")
 	}
 	return 0
 }

@@ -4,9 +4,9 @@ import (
 	Format "GoPoc/main/Developer/AllFormat"
 	handle2 "GoPoc/main/Developer/Handle"
 	"GoPoc/main/Developer/Http"
+	"GoPoc/main/Log"
 	"bytes"
 	"context"
-	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -74,9 +74,9 @@ func ForSendByJson(urlsList []string, pocStruct Format.PocStruct, inputProxy str
 								p := strings.Split(params[tmpI], "=")
 								encodedParams[tmpI] = url.QueryEscape(p[0]) + "=" + url.QueryEscape(p[1])
 							}
-							fmt.Println("[+] [ " + parsedURL.Scheme + "://" + parsedURL.Host + "/" + strings.Join(encodedParams, "&") + " ]\tSuccess! The target may have this vulnerability")
+							Log.Log.Println("[+] [ " + parsedURL.Scheme + "://" + parsedURL.Host + "/" + strings.Join(encodedParams, "&") + " ]\tSuccess! The target may have this vulnerability")
 						} else {
-							fmt.Println("[+] [ " + parsedURL.Scheme + "://" + parsedURL.Host + "/" + " ]\tSuccess! The target may have this vulnerability")
+							Log.Log.Println("[+] [ " + parsedURL.Scheme + "://" + parsedURL.Host + "/" + " ]\tSuccess! The target may have this vulnerability")
 						}
 					}
 					cancel()
