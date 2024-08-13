@@ -6,6 +6,12 @@
 
 - 你是否发现一个新漏洞但苦于无法快速编写成脚本？这款工具可能适合你，只要你能看http请求包/响应包就能上手写poc。
 - 想更高深的利用？比如文件上传写冰蝎、哥斯拉。那么代码模式适合你。
+- 和 nuclei 的区别: nuclei有非常庞大的用户社区,可以比较快速的提供非常新的poc,而GoPoc侧重在poc/exp编写,
+  通过断点调试的方法可以帮助我们快速编写poc/exp , 最后再结合fofa来快速打点
+
+# 注意事项:
+- User文件夹下只能放一个自己写的go poc文件,这是由于go语言的特性,个人暂时没有解决办法
+- 想使用 Poc文件夹下的 go文件时,请"复制"过去,而不是直接拖过去,因为拖过去会弹个窗让你重构,你点击重构代码就乱套了,就无法使用 (你要是会开发可以直接拖过去)
 
 # 免责声明
 
@@ -64,31 +70,31 @@ http://127.0.0.1:8082
 
 - 两种利用模式：
 
-  - json模式
+  - json模式 [非常不推荐,因为不够灵活,且后续版本不会对其进行优化,所以会非常有可能会遇到各种奇奇怪怪的问题]
 
     新建一个 **文件名.go** 文件，输入以下内容：
 
   ```go
   package User
-  
+
   import (
   	"GoPoc/main/Developer/AllFormat"
   	"GoPoc/main/Developer/Http"
   	"net/http"
   	"strings"
   )
-  
+
   var Json string
   var Poc func(hostInfo string, client *http.Client) bool
   var Exp func(expResult Format.ExpResult, client *http.Client) Format.ExpResult
-  
+
   func init() {
   	// 有代码使用代码,无代码使用json
   	// 如果存在代码,可以不写Json格式(即Json格式有架构,但内容为空).但必须存在 fofa语句
   	// 此处的json只是说明json的使用方式,与代码模式并无关联
   	Json = `{
       // 必须,表明想要查找的fofa语句.
-      "fofa":"body=\"hello world\"", 
+      "fofa":"body=\"hello world\"",
      	// 请求包
       "Request":{
           // 请求方法
@@ -115,23 +121,23 @@ http://127.0.0.1:8082
                        "Regexp": ".*?",
   			        "Header":{
                           				// 状态码
-  			                            "Status": "200"      
+  			                            "Status": "200"
   			            },
   			        // response Body ,同样是支持多个Body,当都符合时为True
   			        "Body":[
   			        				    "Hello World",
                           				 "wahaha"
-  			            ]  
+  			            ]
   			    },
               	 // 条件2
              		 {
   			        "Header":{
                           				// 状态码
-  			                            "Status": "200"      
+  			                            "Status": "200"
   			            }
   			    }
   			]
-  
+
   }
   }`
   }
@@ -142,22 +148,23 @@ http://127.0.0.1:8082
 
   - go 模式
 
-    在 main\User 文件夹下新建一个 **文件名.go** 文件，输入以下内容：
+    在 main\User 文件夹下新建一个 **文件名.go** 文件，然后 config 文件指定该 go 文件即可,go 文件的内容如下[只做样例说明,真正的文件请看 dvwaSqlScan.go 文件]：
 
   ```go
   package User
-  
+
   import (
   	"GoPoc/main/Developer/AllFormat"
   	"GoPoc/main/Developer/Http"
+  	"GoPoc/main/User/Utils"
   	"net/http"
   	"strings"
   )
-  
+
   var Json string
   var Poc func(hostInfo string, client *http.Client) bool
   var Exp func(expResult Format.ExpResult, client *http.Client) Format.ExpResult
-  
+
   // Poc 编写,以 dvwa 靶场的sql注入为例
   func init() {
   	// 有代码使用代码,无代码使用json
@@ -165,28 +172,95 @@ http://127.0.0.1:8082
   	// 此处的json只是说明json的使用方式,与代码模式并无关联
   	Json = `{
       // 必须,表明想要查找的fofa语句.
-      "fofa":"body=\"hello world\"", 
+      "Fofa":"body=\"Login :: Damn Vulnerable Web Application\"",
+      "Uri" : "/dvwa/"  // 这个uri指的是探测模式是所要访问的uri
      	// 请求包
       "Request":{
-          
+          // 请求方法
+  		"Method": "GET",
+  		 // 请求路径,这里分别请求两个uri
+  		"Uri": [
+  		      "/robots.txt",
+                 "/hello.txt"
+  	   			],
+  		// 自定义 header 头
+  		"Header":{
+  			"Accept-Encoding":"gzip"
+  		}
   	},
       // 响应包
       "Response":{
-  	}
+          // 定义多个Group之间的关系,有AND和OR这两种,其中AND是都满足漏洞才存在,OR是其中一个条件满足即可.
+  		"Operation":"OR",
+          // 判断条件
+  		"Group":[
+              	 // 条件1
+  				{
+                      // 支持正则表达式
+                       "Regexp": ".*?",
+  			        "Header":{
+                          				// 状态码
+  			                            "Status": "200"
+  			            },
+  			        // response Body ,同样是支持多个Body,当都符合时为True
+  			        "Body":[
+  			        				    "Hello World",
+                          				 "wahaha"
+  			            ]
+  			    },
+              	 // 条件2
+             		 {
+  			        "Header":{
+                          				// 状态码
+  			                            "Status": "200"
+  			            }
+  			    }
+  			]
+
+  }
   }`
+
+  	getSessionByLogin := func(hostInfo string, client *http.Client) (string, error) {
+  		// 发起登录请求 --> 302跳转 --> 获取请求包中的session , 并返回
+  		config := Http.NewHttpConfig()
+  		config.Uri = "/dvwa/"
+  		config.Client = client
+  		resp, err := Http.SendHttpRequest(hostInfo, config)
+  		if err != nil {
+  			return "", err
+  		}
+  		config.Header["Cookie"] = resp.Header["Set-Cookie"][0]
+  		config.Body = "username=admin&password=password&Login=Login&user_token=" + Utils.RandomStringByModule(24, 1)
+  		config.Uri = "/dvwa/login.php"
+  		resp, err = Http.SendHttpRequest(hostInfo, config)
+  		if err != nil {
+  			return "", err
+  		}
+  		if !strings.Contains(resp.Body, "Welcome :: Damn Vulnerable Web ") {
+  			return "", err
+  		}
+  		return resp.Header["Set-Cookie"][0], nil
+  	}
+
   	// 建议: 函数名+随机命名
   	sendLoginByToken455445 := func(hostInfo string, client *http.Client) (Format.CustomResponseFormat, error) {
+  		var err error
+  		var customResponse Format.CustomResponseFormat
   		config := Http.NewHttpConfig()
-  		config.Header["Cookie"] = "security=low; PHPSESSID=1abcbe73869e90560e9061ca636c813e" // (非强制) 自定义Header头
+  		config.Header["Cookie"], err = getSessionByLogin(hostInfo, client) // (非强制) 自定义Header头
+  		if err != nil {
+  			return customResponse, nil
+  		}
   		config.Header["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"
-  		config.TimeOut = 5    // (非强制) 如果不写的话默认值为 5秒
-  		config.Method = "GET" // (非强制) 如果不写的话默认值为 GET方式
+  		config.Header["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:129.0) Gecko/20100101 Firefox/129.0" // (非强制) 如果不写的话随机从默认URL列表上选取一个
+  		config.TimeOut = 5                                                                                               // (非强制) 如果不写的话默认值为 5秒
+  		config.Method = "GET"                                                                                            // (非强制) 如果不写的话默认值为 GET方式
   		//config.Body = `123` 			// (非强制) 如果不写的话默认值为 ""
   		config.Uri = "/dvwa/index.php" // (非强制) 如果不写的话默认值为 ""
   		config.Client = client         // (强制) 因为这个 client 挂上了burpSuite代理,如果你使用自己的client可能会因为没有挂代理而无法得知利用过程,会不好写poc/exp
   		return Http.SendHttpRequest(hostInfo, config)
   	}
-  
+
   	// 建议: 函数名+随机命名
   	sendSqlPayload5251552 := func(hostInfo string, client *http.Client) (Format.CustomResponseFormat, error) {
   		config := Http.NewHttpConfig()
@@ -195,7 +269,7 @@ http://127.0.0.1:8082
   		config.Client = client
   		return Http.SendHttpRequest(hostInfo, config)
   	}
-  
+
   	// 如果使用代码模式, Poc函数为必须,其中的参数固定
   	Poc = func(hostInfo string, client *http.Client) bool {
   		resp, err := sendLoginByToken455445(hostInfo, client)
@@ -208,13 +282,14 @@ http://127.0.0.1:8082
   		resp, err = sendSqlPayload5251552(hostInfo, client)
   		return err == nil && strings.Contains(resp.Body, "You have an error in your SQL syntax;")
   	}
-  
+
   	// 如果使用代码模式, Exp函数为必须,其中的参数固定
   	// Exp 你可以尝试自己写一下:
   	Exp = func(expResult Format.ExpResult, client *http.Client) Format.ExpResult {
   		return expResult
   	}
   }
+
   
   ```
 
@@ -238,10 +313,4 @@ http://127.0.0.1:8082
 ```md
 1. 基于 fofa 规则匹配对应产品,匹配成功后才开始使用POC,避免发送无用包
 2. POC 易编写,只需要会看http响应包和http回显包即可
-```
-
-# TODO
-
-```md
-
 ```

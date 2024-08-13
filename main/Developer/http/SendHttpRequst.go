@@ -19,10 +19,11 @@ func SendHttpRequest(hostInfo string, config SetHttpConfig) (Format.CustomRespon
 	}
 
 	// Set a timeout for the request
-	if config.TimeOut == 0 {
+	if config.TimeOut <= 0 {
 		config.TimeOut = 5
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*config.TimeOut)
+
 	ProcessPackagesForCode(procedureRequest, config)
 	procedureRequest = procedureRequest.WithContext(ctx)
 	// Send request and obtain response results
@@ -34,10 +35,14 @@ func SendHttpRequest(hostInfo string, config SetHttpConfig) (Format.CustomRespon
 
 	// 对自定义Response进行赋值
 	bodyOfExecutionResults, err := io.ReadAll(procedureResponse.Body)
-	if err != nil {
+	if config.Method == "GET" && err != nil {
+		cancel()
+		return customResponse, err
+	} else if config.Method == "POST" && err == nil {
 		cancel()
 		return customResponse, err
 	}
+
 	customResponse.Body = string(bodyOfExecutionResults)
 	customResponse.Request = procedureResponse.Request
 	customResponse.Header = procedureResponse.Header
@@ -60,20 +65,26 @@ func SendHttpRequest(hostInfo string, config SetHttpConfig) (Format.CustomRespon
 
 // ProcessPackagesForCode 被用来处理包,包含请求包和响应包. 用处给未写明的header头字段赋予初值
 func ProcessPackagesForCode(procedureRequest *http.Request, config SetHttpConfig) {
-	// 随机 UA
-	userAgents := []string{
-		"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0",
-		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
-		"Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; Trident/4.0; Hot Lingo 2.0)",
-		"Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36",
-		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3451.0 Safari/537.36",
-		"Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36 OPR/31.0.1889.174",
-		"Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.21 (KHTML, like Gecko) Chrome/19.0.1041.0 Safari/535.21",
-		"Mozilla/5.0 (Macintosh; U; PPC Mac OS X; ja-jp) AppleWebKit/418.9.1 (KHTML, like Gecko) Safari/419.3",
-		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36",
+
+	var randomUserAgent string
+	if config.Header["User-Agent"] != "" {
+		randomUserAgent = config.Header["User-Agent"]
+	} else {
+		// 随机 UA
+		userAgents := []string{
+			"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0",
+			"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
+			"Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; Trident/4.0; Hot Lingo 2.0)",
+			"Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36",
+			"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3451.0 Safari/537.36",
+			"Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36 OPR/31.0.1889.174",
+			"Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.21 (KHTML, like Gecko) Chrome/19.0.1041.0 Safari/535.21",
+			"Mozilla/5.0 (Macintosh; U; PPC Mac OS X; ja-jp) AppleWebKit/418.9.1 (KHTML, like Gecko) Safari/419.3",
+			"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36",
+		}
+		rand.Seed(time.Now().UnixNano())
+		randomUserAgent = userAgents[rand.Intn(len(userAgents))]
 	}
-	rand.Seed(time.Now().UnixNano())
-	randomUserAgent := userAgents[rand.Intn(len(userAgents))]
 
 	// 对 header 头赋予默认值
 	defaultHeaders := map[string]string{

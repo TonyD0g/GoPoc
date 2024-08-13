@@ -1,8 +1,11 @@
 package Utils
 
 import (
+	Http "GoPoc/main/Developer/http"
 	"bytes"
+	"fmt"
 	"math/rand"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -50,4 +53,50 @@ func SplitStr(key string) []int {
 	}
 
 	return result
+}
+
+// ParseHeaders 解析输入字符串，并返回键值对的映射
+func ParseHeaders(input string) {
+	// 创建一个正则表达式，用于匹配键值对
+	re := regexp.MustCompile(`(?m)^\s*(\S+):\s*(.*)$`)
+	matches := re.FindAllStringSubmatch(input, -1)
+
+	// 创建一个map来存储结果
+	headers := make(map[string]string)
+
+	// 遍历匹配结果，并将其存储到map中
+	for _, match := range matches {
+		if len(match) > 2 {
+			headers[strings.TrimSpace(match[1])] = strings.TrimSpace(match[2])
+		}
+	}
+	fmt.Println("[+] 解析 header 字符串,输出的结果为:")
+	// 打印结果
+	for key, value := range headers {
+		fmt.Printf("%s: %s\n", key, value)
+	}
+}
+
+// FullyAutomaticFillingHeader 输入请求体，全自动构造 header 【但可能存在Bug,如果遇到bug了,那还是人为构造吧】
+func FullyAutomaticFillingHeader(config Http.SetHttpConfig, input string) Http.SetHttpConfig {
+	// 创建一个正则表达式，用于匹配键值对
+	re := regexp.MustCompile(`(?m)^\s*(\S+):\s*(.*)$`) // todo 这个正则表达式可能会存在问题
+	matches := re.FindAllStringSubmatch(input, -1)
+
+	// 创建一个map来存储结果
+	headers := make(map[string]string)
+
+	// 遍历匹配结果，并将其存储到map中
+	for _, match := range matches {
+		if len(match) > 2 {
+			headers[strings.TrimSpace(match[1])] = strings.TrimSpace(match[2])
+		}
+	}
+	for key, value := range headers {
+		if key == "Host" || key == "User-Agent" {
+			continue
+		}
+		config.Header[key] = value
+	}
+	return config
 }

@@ -3,6 +3,7 @@ package User
 import (
 	"GoPoc/main/Developer/AllFormat"
 	"GoPoc/main/Developer/Http"
+	"GoPoc/main/User/Utils"
 	"net/http"
 	"strings"
 )
@@ -17,46 +18,46 @@ func init() {
 	// 如果存在代码,可以不写Json格式(即Json格式有架构,但内容为空).但必须存在 fofa语句
 	// 此处的json只是说明json的使用方式,与代码模式并无关联
 	Json = `{
-    // 必须,表明想要查找的fofa语句.
-    "fofa":"body=\"hello world\"", 
-   	// 请求包
+    
+    "Fofa":"((body != \"hello\" && header != \"dsd\") && (body!= \"sb\" && header != \"nihao\")) && body!=\"sbb\" || header!=\"ba\"", 
+  	"Uri":"/dvwa/",
     "Request":{
-        // 请求方法
+
 		"Method": "GET",
-		 // 请求路径,这里分别请求两个uri
+
 		"Uri": [
 		      "/robots.txt",
                "/hello.txt"
 	   			],
-		// 自定义 header 头
+
 		"Header":{
 			"Accept-Encoding":"gzip"
 		}
 	},
-    // 响应包
+
     "Response":{
-        // 定义多个Group之间的关系,有AND和OR这两种,其中AND是都满足漏洞才存在,OR是其中一个条件满足即可.
+
 		"Operation":"OR",
-        // 判断条件
+
 		"Group":[
-            	 // 条件1
+
 				{
-                    // 支持正则表达式
+    
                      "Regexp": ".*?",
 			        "Header":{
-                        				// 状态码
+                        		
 			                            "Status": "200"      
 			            },
-			        // response Body ,同样是支持多个Body,当都符合时为True
+			
 			        "Body":[
 			        				    "Hello World",
                         				 "wahaha"
 			            ]  
 			    },
-            	 // 条件2
+      
            		 {
 			        "Header":{
-                        				// 状态码
+                  
 			                            "Status": "200"      
 			            }
 			    }
@@ -64,13 +65,43 @@ func init() {
 
 }
 }`
+
+	// 这个函数存在问题,因为 session 是服务器生成的, 所以本go文件利用不了,只是做样例说明,gif演示成功是因为我将能登录成功的cookie复制并放在 sendLoginByToken455445 函数里了
+	getSessionByLogin := func(hostInfo string, client *http.Client) (string, error) {
+		// 发起登录请求 --> 302跳转 --> 获取请求包中的session , 并返回
+		config := Http.NewHttpConfig()
+		config.Uri = "/dvwa/"
+		config.Client = client
+		resp, err := Http.SendHttpRequest(hostInfo, config)
+		if err != nil {
+			return "", err
+		}
+		config.Header["Cookie"] = resp.Header["Set-Cookie"][0]
+		config.Body = "username=admin&password=password&Login=Login&user_token=" + Utils.RandomStringByModule(24, 1)
+		config.Uri = "/dvwa/login.php"
+		resp, err = Http.SendHttpRequest(hostInfo, config)
+		if err != nil {
+			return "", err
+		}
+		if !strings.Contains(resp.Body, "Welcome :: Damn Vulnerable Web ") {
+			return "", err
+		}
+		return resp.Header["Set-Cookie"][0], nil
+	}
+
 	// 建议: 函数名+随机命名
 	sendLoginByToken455445 := func(hostInfo string, client *http.Client) (Format.CustomResponseFormat, error) {
+		var err error
+		var customResponse Format.CustomResponseFormat
 		config := Http.NewHttpConfig()
-		config.Header["Cookie"] = "security=low; PHPSESSID=003284db9cacc3470c53abb33609df0b" // (非强制) 自定义Header头
+		config.Header["Cookie"], err = getSessionByLogin(hostInfo, client) // (非强制) 自定义Header头
+		if err != nil {
+			return customResponse, nil
+		}
 		config.Header["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"
-		config.TimeOut = 5    // (非强制) 如果不写的话默认值为 5秒
-		config.Method = "GET" // (非强制) 如果不写的话默认值为 GET方式
+		config.Header["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:129.0) Gecko/20100101 Firefox/129.0" // (非强制) 如果不写的话随机从默认URL列表上选取一个
+		config.TimeOut = 5                                                                                               // (非强制) 如果不写的话默认值为 5秒
+		config.Method = "GET"                                                                                            // (非强制) 如果不写的话默认值为 GET方式
 		//config.Body = `123` 			// (非强制) 如果不写的话默认值为 ""
 		config.Uri = "/dvwa/index.php" // (非强制) 如果不写的话默认值为 ""
 		config.Client = client         // (强制) 因为这个 client 挂上了burpSuite代理,如果你使用自己的client可能会因为没有挂代理而无法得知利用过程,会不好写poc/exp
