@@ -38,10 +38,11 @@ func SendHttpRequest(hostInfo string, config SetHttpConfig) (Format.CustomRespon
 	if config.Method == "GET" && err != nil {
 		cancel()
 		return customResponse, err
-	} else if config.Method == "POST" && err == nil {
-		cancel()
-		return customResponse, err
 	}
+	//else if config.Method == "POST" && err != nil {
+	//	cancel()
+	//	return customResponse, err
+	//}
 
 	customResponse.Body = string(bodyOfExecutionResults)
 	customResponse.Request = procedureResponse.Request
@@ -103,6 +104,7 @@ func ProcessPackagesForCode(procedureRequest *http.Request, config SetHttpConfig
 	// 情况1: header字段已设置值则使用设置值,不赋予默认值
 	for headerName, headerValue := range config.Header {
 		procedureRequest.Header.Add(headerName, headerValue)
+		isHasExist[headerName] = true
 	}
 
 	// 情况2: header字段未设置值则赋予默认值.

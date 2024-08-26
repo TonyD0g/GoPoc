@@ -1,15 +1,17 @@
-# [红蓝工具]GoPoc
+# [红蓝工具] GoPoc
 
 **基于 Json 、自定义Go脚本、fofa的快速验证扫描引擎，可用于快速验证目标是否存在该漏洞。**
 
-你甚至可以拿来写自动化脚本来加快你的工作效率,比如从海量url中获取到符合条件的url,从而避免重复的点鼠标环节
+**注意：Json模式后续不再维护，因为扩展性太差，请使用 代码模式**
 
 使用场景：
 
 - 你是否发现一个新漏洞但苦于无法快速编写成脚本？这款工具可能适合你，只要你能看http请求包/响应包就能上手写poc。
 - 想更高深的利用？比如文件上传写冰蝎、哥斯拉。那么代码模式适合你。
-- 和 nuclei 的区别: nuclei有非常庞大的用户社区,可以比较快速的提供非常新的poc,而GoPoc侧重在poc/exp编写,
-  通过断点调试的方法可以帮助我们快速编写poc/exp , 最后再结合fofa来快速打点
+- **办公、蓝队场景**：比如上级让你统计某批用户的发帖量，你固然可以点鼠标一个个算对应用户的发帖量，但何不写个脚本全自动跑，下次遇到了再运行脚本？
+- **红队场景**：nuclei上发现一个不错的漏洞或者你自己挖掘到的漏洞，将其转换为GoPoc，这样打点速度极快（毕竟FOFA可以指定语法，导出一批资产）
+- 和 nuclei 的区别：nuclei有非常庞大的用户社区,可以比较快速的提供非常新的poc，而GoPoc侧重在poc/exp编写,
+  通过断点调试的方法可以帮助我们快速编写poc/exp , 最后再结合fofa来快速打点。你可以经常编写GoPoc 形成你自己的漏洞库，GoPoc不会随意的使用所有Poc，而是在符合条件的情况下才会使用Poc（比如目标资产符合你设置的FOFA语法、符合探测模式构建的语法），这样可以避免被安全设备提前探测拦截。
 
 # 注意事项:
 - User文件夹下只能放一个自己写的go poc文件,这是由于go语言的特性,个人暂时没有解决办法
@@ -43,12 +45,10 @@
 ```md
 -email // fofa的email (必须)
 -key // fofa的key (必须)
--url // 扫单个url (非必须)
--file // 扫url文件中的每一个url (非必须)
 -vul // poc/exp文件,文件后缀为.go (必须)
 -mod // 指定poc/exp这两种模式 (必须)
 -proxy // burpsuite 代理,用于方便写poc/exp (必须)
--maxConcurrentLevel // 最大并发量,越大扫描速度越快 (必须)
+-maxConcurrentLevel // 最大并发量,越大扫描速度越快,取决于你CPU (必须)
 -maxFofaSize     // fofa最大检索数 (必须)
 ------------------------------------
 例如
@@ -60,8 +60,6 @@ fdgdfhfgdhdfgdhfghfdg
 D:\Coding\Github\GoPoc\main\User\test.go
 -mod
 poc
--url
-http://127.0.0.1
 -proxy
 http://127.0.0.1:8082
 -maxConcurrentLevel
@@ -70,83 +68,9 @@ http://127.0.0.1:8082
 300
 ```
 
-- 两种利用模式：
+- **利用模式**：
 
-  - json模式 [非常不推荐,因为不够灵活,且后续版本不会对其进行优化,所以会非常有可能会遇到各种奇奇怪怪的问题]
-
-    新建一个 **文件名.go** 文件，输入以下内容：
-
-  ```go
-  package User
-
-  import (
-    "GoPoc/main/Developer/AllFormat"
-    "GoPoc/main/Developer/Http"
-    "net/http"
-    "strings"
-  )
-
-  var Json string
-  var Poc func(hostInfo string, client *http.Client) bool
-  var Exp func(expResult Format.ExpResult, client *http.Client) Format.ExpResult
-
-  func init() {
-    // 有代码使用代码,无代码使用json
-    // 如果存在代码,可以不写Json格式(即Json格式有架构,但内容为空).但必须存在 fofa语句
-    // 此处的json只是说明json的使用方式,与代码模式并无关联
-    Json = `{
-      // 必须,表明想要查找的fofa语句.
-      "fofa":"body=\"hello world\"",
-      // 请求包
-      "Request":{
-          // 请求方法
-      "Method": "GET",
-       // 请求路径,这里分别请求两个uri
-      "Uri": [
-            "/robots.txt",
-                 "/hello.txt"
-            ],
-      // 自定义 header 头
-      "Header":{
-        "Accept-Encoding":"gzip"
-      }
-    },
-      // 响应包
-      "Response":{
-          // 定义多个Group之间的关系,有AND和OR这两种,其中AND是都满足漏洞才存在,OR是其中一个条件满足即可.
-      "Operation":"OR",
-          // 判断条件
-      "Group":[
-                 // 条件1
-          {
-                      // 支持正则表达式
-                       "Regexp": ".*?",
-                "Header":{
-                                  // 状态码
-                                    "Status": "200"
-                    },
-                // response Body ,同样是支持多个Body,当都符合时为True
-                "Body":[
-                            "Hello World",
-                                   "wahaha"
-                    ]
-            },
-                 // 条件2
-                 {
-                "Header":{
-                                  // 状态码
-                                    "Status": "200"
-                    }
-            }
-        ]
-
-  }
-  }`
-  }
-  
-  ```
-
-  
+  - Json 模式：被废弃，但保留对应源码
 
   - go 模式
 
@@ -154,7 +78,7 @@ http://127.0.0.1:8082
 
   ```go
   package User
-
+  
   import (
     "GoPoc/main/Developer/AllFormat"
     "GoPoc/main/Developer/Http"
@@ -162,17 +86,21 @@ http://127.0.0.1:8082
     "net/http"
     "strings"
   )
-
+  
   var Json string
   var Poc func(hostInfo string, client *http.Client) bool
   var Exp func(expResult Format.ExpResult, client *http.Client) Format.ExpResult
-
+  
   // Poc 编写,以 dvwa 靶场的sql注入为例
   func init() {
     // 有代码使用代码,无代码使用json
     // 如果存在代码,可以不写Json格式(即Json格式有架构,但内容为空).但必须存在 fofa语句
     // 此处的json只是说明json的使用方式,与代码模式并无关联
     Json = `{
+    	// 值非必须,如果有值则不使用fofa查询,而直接访问该File对应的文件,比如url.txt
+    	"File":"",
+    	// 值非必须,如果有值则不使用fofa查询,而直接访问该Url,比如 http://www.baidu.com ,要带http://或https://
+    	"Url":"https://www.baidu.com",
       // 必须,表明想要查找的fofa语句.
       "Fofa":"body=\"Login :: Damn Vulnerable Web Application\"",
       "Uri" : "/dvwa/"  // 这个uri指的是探测模式是所要访问的uri
@@ -218,10 +146,10 @@ http://127.0.0.1:8082
                     }
             }
         ]
-
+  
   }
   }`
-
+  
     getSessionByLogin := func(hostInfo string, client *http.Client) (string, error) {
       // 发起登录请求 --> 302跳转 --> 获取请求包中的session , 并返回
       config := Http.NewHttpConfig()
@@ -243,7 +171,7 @@ http://127.0.0.1:8082
       }
       return resp.Header["Set-Cookie"][0], nil
     }
-
+  
     // 建议: 函数名+随机命名
     sendLoginByToken455445 := func(hostInfo string, client *http.Client) (Format.CustomResponseFormat, error) {
       var err error
@@ -262,7 +190,7 @@ http://127.0.0.1:8082
       config.Client = client         // (强制) 因为这个 client 挂上了burpSuite代理,如果你使用自己的client可能会因为没有挂代理而无法得知利用过程,会不好写poc/exp
       return Http.SendHttpRequest(hostInfo, config)
     }
-
+  
     // 建议: 函数名+随机命名
     sendSqlPayload5251552 := func(hostInfo string, client *http.Client) (Format.CustomResponseFormat, error) {
       config := Http.NewHttpConfig()
@@ -271,7 +199,7 @@ http://127.0.0.1:8082
       config.Client = client
       return Http.SendHttpRequest(hostInfo, config)
     }
-
+  
     // 如果使用代码模式, Poc函数为必须,其中的参数固定
     Poc = func(hostInfo string, client *http.Client) bool {
       resp, err := sendLoginByToken455445(hostInfo, client)
@@ -284,14 +212,14 @@ http://127.0.0.1:8082
       resp, err = sendSqlPayload5251552(hostInfo, client)
       return err == nil && strings.Contains(resp.Body, "You have an error in your SQL syntax;")
     }
-
+  
     // 如果使用代码模式, Exp函数为必须,其中的参数固定
     // Exp 你可以尝试自己写一下:
     Exp = func(expResult Format.ExpResult, client *http.Client) Format.ExpResult {
       return expResult
     }
   }
-
+  
   
   ```
 
@@ -300,10 +228,8 @@ http://127.0.0.1:8082
 - 书写规范: 
 
   ```md
-  1. 使用go模式时必须存在 Poc/Exp 函数,如果是使用json模式不写 Poc/Exp 函数
+  1. 使用go模式时必须存在 Poc/Exp 函数
   2. 如果存在代码,可以不写Json格式(即Json格式有架构,但内容为空).但必须存在 fofa语句
-  3. json 模式只支持 poc,不支持 exp
-  4. json 模式能书写的复杂度不如 go 模式,如果想更深层次利用请使用 go 模式
   ```
 
 # 效果展示：

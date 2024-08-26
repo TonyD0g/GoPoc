@@ -20,6 +20,9 @@ func ForSendByCode(pocOrExp string, urlsList []string, inputProxy string, maxCon
 	if numThreads > len(urlsList) {
 		numThreads = len(urlsList)
 	}
+	if numThreads == 0 {
+		numThreads = 1
+	}
 	urlsPerThread := len(urlsList) / numThreads
 	for i := 0; i < numThreads; i++ {
 		start := i * urlsPerThread

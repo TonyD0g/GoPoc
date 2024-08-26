@@ -5,4 +5,6 @@ type PocStruct struct {
 	ResponsePackage ResponsePackage `json:"Response"`
 	Fofa            string          `json:"Fofa"`
 	Uri             string          `json:"Uri"`
+	Url             string          `json:"Url"`
+	File            string          `json:"File"`
 }

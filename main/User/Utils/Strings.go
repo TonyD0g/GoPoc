@@ -1,7 +1,7 @@
 package Utils
 
 import (
-	Http "GoPoc/main/Developer/http"
+	"GoPoc/main/Developer/Http"
 	"bytes"
 	"fmt"
 	"math/rand"

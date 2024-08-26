@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
 func SearchReturnByte(config map[string]string, pocStruct Format.PocStruct, maxFofaSizeInt int) []byte {
@@ -38,5 +39,10 @@ func SearchReturnByte(config map[string]string, pocStruct Format.PocStruct, maxF
 		fmt.Printf("%v\n", err.Error())
 		os.Exit(1)
 	}
+	if strings.Contains(string(content), "查询语法错误") {
+		fmt.Printf("%s\n", "fofa 查询语法错误")
+		os.Exit(1)
+	}
+
 	return content
 }

@@ -1,13 +1,9 @@
-1.5.4 更新日志
-[+] 修复: 不刻意填写UA，才会随机选取UA
-[+] 修复: 鲁棒性优化
-[+] 修复: 发送post请求可能无法构造自定义请求包的问题
-[+] 添加: 探测模式：有时候fofa没有收录目标站点，因此需要不借助fofa进行页面规则的扫描,避免想要扫描的资产不在fofa收录列表中,但意味着每次扫描一个资产会多发一个用于探测的请求包
-                  [支持各种复杂的表达式,比如:   ((body != "hello" && header != "dsd") && (body!= "sb" && header != "nihao")) && body!="sbb" || header!="ba" ]
-
-                  局限性:
-                    [规则只限定http，而且json中填写的fofa规则不允许存在app语法(app本质上也是各种基础语法构成的,只不过背后的数据在fofa服务器中)]
-
-[+] 添加: 输入请求体，全自动构造 header 【但可能存在Bug,如果遇到bug了,那还是人为构造吧】 该函数位于 main/User/Utils/Strings.go 文件下的 FullyAutomaticFillingHeader 函数
-         只解析,不全自动构造 header: main/User/Utils/Strings.go 文件下的ParseHeaders 函数
+1.5.5 更新日志
+- 增加: 发包前检测各项IP地址,确保挂了代理,否则被溯源
+- 增加: 检测是否开启了burp,如果没有开启则输出“没有开启” 且直接退出
+- 更改: 将 config.ini 中的 url 和 file 保存到 poc 中,这样更换poc时不用再改 config.ini 中的 url 或 file 选项
+- 优化: "输入请求体，全自动构造 header" ,现在自动化构造的header不会再有重复项了
+- 优化: main 方法优化
+- 修复: 潜在的溢出bug修复
+- 修复: 无法使用 "输入请求体，全自动构造 header" 功能的Bug
 
