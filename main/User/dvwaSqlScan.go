@@ -18,7 +18,8 @@ func init() {
 	// 如果存在代码,可以不写Json格式(即Json格式有架构,但内容为空).但必须存在 fofa语句
 	// 此处的json只是说明json的使用方式,与代码模式并无关联
 	Json = `{
-    
+    "File":"",
+    "Url":"",
     "Fofa":"((body != \"hello\" && header != \"dsd\") && (body!= \"sb\" && header != \"nihao\")) && body!=\"sbb\" || header!=\"ba\"", 
   	"Uri":"/dvwa/",
     "Request":{
