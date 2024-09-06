@@ -2,7 +2,7 @@ package Core
 
 import (
 	Format "GoPoc/main/Developer/AllFormat"
-	"GoPoc/main/Developer/Http"
+	"GoPoc/main/Developer/HttpAbout"
 	"GoPoc/main/Log"
 	"GoPoc/main/User"
 	"net/http"
@@ -12,7 +12,7 @@ import (
 )
 
 func ForSendByCode(pocOrExp string, urlsList []string, inputProxy string, maxConcurrentLevel int, isDetectionMode string, pocStruct Format.PocStruct) {
-	client := Http.SetProxy(inputProxy)
+	client := HttpAbout.SetProxy(inputProxy)
 	waitGroup := &sync.WaitGroup{}
 
 	// 计算要划分的小的urlsList数量
@@ -76,12 +76,12 @@ func IsDetectionMode(hostInfo string, client *http.Client, pocStruct Format.PocS
 	}
 
 	// 不借助 fofa 进行页面规则的扫描
-	config := Http.NewHttpConfig()
+	config := HttpAbout.NewHttpConfig()
 	config.Uri = pocStruct.Uri
 	config.TimeOut = 10
 	config.Method = "GET"
 	config.Client = client
-	resp, err := Http.SendHttpRequest(hostInfo, config)
+	resp, err := HttpAbout.SendHttpRequest(hostInfo, config)
 	if err != nil {
 		Log.Log.Fatal("[-] 解析探测语句失败! :", err)
 	}

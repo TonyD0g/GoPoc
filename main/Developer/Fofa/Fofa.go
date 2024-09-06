@@ -32,7 +32,7 @@ func SearchReturnByte(config map[string]string, pocStruct Format.PocStruct, maxF
 		[]byte("&page="), []byte(strconv.Itoa(1)),
 		[]byte("&size="), []byte(strconv.Itoa(maxFofaSizeInt)),
 	}, []byte(""))
-	//fmt.Printf("%s\n", lastQueryUrl) // fofa 查询语句
+	fmt.Printf("%s\n", lastQueryUrl) // fofa 查询语句
 	content, err := fofaClient.Get(string(lastQueryUrl))
 
 	if err != nil {

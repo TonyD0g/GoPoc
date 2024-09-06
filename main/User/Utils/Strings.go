@@ -1,7 +1,7 @@
 package Utils
 
 import (
-	"GoPoc/main/Developer/Http"
+	"GoPoc/main/Developer/HttpAbout"
 	"bytes"
 	"fmt"
 	"math/rand"
@@ -78,7 +78,7 @@ func ParseHeaders(input string) {
 }
 
 // FullyAutomaticFillingHeader 输入请求体，全自动构造 header 【但可能存在Bug,如果遇到bug了,那还是人为构造吧】
-func FullyAutomaticFillingHeader(config Http.SetHttpConfig, input string) Http.SetHttpConfig {
+func FullyAutomaticFillingHeader(config HttpAbout.SetHttpConfig, input string) HttpAbout.SetHttpConfig {
 	// 创建一个正则表达式，用于匹配键值对
 	re := regexp.MustCompile(`(?m)^\s*(\S+):\s*(.*)$`) // todo 这个正则表达式可能会存在问题
 	matches := re.FindAllStringSubmatch(input, -1)

@@ -7,4 +7,5 @@ type PocStruct struct {
 	Uri             string          `json:"Uri"`
 	Url             string          `json:"Url"`
 	File            string          `json:"File"`
+	Coroutine       string          `json:"Coroutine"`
 }
