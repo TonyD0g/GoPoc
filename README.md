@@ -81,7 +81,7 @@ http://127.0.0.1:8082
   
   import (
     "GoPoc/main/Developer/AllFormat"
-    "GoPoc/main/Developer/Http"
+    "GoPoc/main/Developer/HttpAbout"
     "GoPoc/main/User/Utils"
     "net/http"
     "strings"
@@ -97,6 +97,8 @@ http://127.0.0.1:8082
     // 如果存在代码,可以不写Json格式(即Json格式有架构,但内容为空).但必须存在 fofa语句
     // 此处的json只是说明json的使用方式,与代码模式并无关联
     Json = `{
+    	// 值非必须,如果有值则使用这个协程数,否则使用全局协程数,全局协程数不写也行,默认使用200
+    	"Coroutine":"10",
     	// 值非必须,如果有值则不使用fofa查询,而直接访问该File对应的文件,比如url.txt
     	"File":"",
     	// 值非必须,如果有值则不使用fofa查询,而直接访问该Url,比如 http://www.baidu.com ,要带http://或https://
@@ -152,17 +154,17 @@ http://127.0.0.1:8082
   
     getSessionByLogin := func(hostInfo string, client *http.Client) (string, error) {
       // 发起登录请求 --> 302跳转 --> 获取请求包中的session , 并返回
-      config := Http.NewHttpConfig()
+      config := HttpAbout.NewHttpConfig()
       config.Uri = "/dvwa/"
       config.Client = client
-      resp, err := Http.SendHttpRequest(hostInfo, config)
+      resp, err := HttpAbout.SendHttpRequest(hostInfo, config)
       if err != nil {
         return "", err
       }
       config.Header["Cookie"] = resp.Header["Set-Cookie"][0]
       config.Body = "username=admin&password=password&Login=Login&user_token=" + Utils.RandomStringByModule(24, 1)
       config.Uri = "/dvwa/login.php"
-      resp, err = Http.SendHttpRequest(hostInfo, config)
+      resp, err = HttpAbout.SendHttpRequest(hostInfo, config)
       if err != nil {
         return "", err
       }
@@ -176,7 +178,7 @@ http://127.0.0.1:8082
     sendLoginByToken455445 := func(hostInfo string, client *http.Client) (Format.CustomResponseFormat, error) {
       var err error
       var customResponse Format.CustomResponseFormat
-      config := Http.NewHttpConfig()
+      config := HttpAbout.NewHttpConfig()
       config.Header["Cookie"], err = getSessionByLogin(hostInfo, client) // (非强制) 自定义Header头
       if err != nil {
         return customResponse, nil
@@ -188,16 +190,16 @@ http://127.0.0.1:8082
       //config.Body = `123`       // (非强制) 如果不写的话默认值为 ""
       config.Uri = "/dvwa/index.php" // (非强制) 如果不写的话默认值为 ""
       config.Client = client         // (强制) 因为这个 client 挂上了burpSuite代理,如果你使用自己的client可能会因为没有挂代理而无法得知利用过程,会不好写poc/exp
-      return Http.SendHttpRequest(hostInfo, config)
+      return HttpAbout.SendHttpRequest(hostInfo, config)
     }
   
     // 建议: 函数名+随机命名
     sendSqlPayload5251552 := func(hostInfo string, client *http.Client) (Format.CustomResponseFormat, error) {
-      config := Http.NewHttpConfig()
+      config := HttpAbout.NewHttpConfig()
       config.Header["Cookie"] = "security=low; PHPSESSID=1abcbe73869e90560e9061ca636c813e"
       config.Uri = "/dvwa/vulnerabilities/sqli/?id=%27&Submit=Submit#"
       config.Client = client
-      return Http.SendHttpRequest(hostInfo, config)
+      return HttpAbout.SendHttpRequest(hostInfo, config)
     }
   
     // 如果使用代码模式, Poc函数为必须,其中的参数固定

@@ -1,4 +1,4 @@
-package Http
+package HttpAbout
 
 import (
 	"GoPoc/main/Developer/AllFormat"
@@ -32,7 +32,7 @@ func SendForFofa(config map[string]string, pocStruct Format.PocStruct) []string 
 			urlsList = append(urlsList, tmpOutcome[1].(string))
 		}
 	}
-	Log.Log.Println(fmt.Printf("[+] 此 fofa 语句: %v 该fofa语句查询到: %v 条,你想搜索 %v 条\n", queryResponse.Query, queryResponse.Size, config["maxFofaSize"]))
+	Log.Log.Println(fmt.Printf("[+] 查询 fofa 语句为: %v 该fofa语句查询到: %v 条,你最大想搜索 %v 条\n", queryResponse.Query, queryResponse.Size, config["maxFofaSize"]))
 	return urlsList
 }
 

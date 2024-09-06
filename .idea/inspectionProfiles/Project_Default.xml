@@ -4,6 +4,7 @@
     <inspection_tool class="GoDfaErrorMayBeNotNil" enabled="true" level="WARNING" enabled_by_default="true">
       <functions>
         <function importPath="GoPoc/main/Developer/Http" name="SendHttpRequest" />
+        <function importPath="GoPoc/main/Developer/http" name="SendHttpRequest" />
       </functions>
     </inspection_tool>
     <inspection_tool class="HttpUrlsUsage" enabled="true" level="WEAK WARNING" enabled_by_default="true">

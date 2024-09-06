@@ -1,4 +1,4 @@
-package Http
+package HttpAbout
 
 import (
 	"GoPoc/main/Developer/AllFormat"
@@ -12,6 +12,14 @@ import (
 
 func SendHttpRequest(hostInfo string, config SetHttpConfig) (Format.CustomResponseFormat, error) {
 	var customResponse Format.CustomResponseFormat
+
+	if !strings.HasPrefix(strings.ToLower(hostInfo), "http://") && !strings.HasPrefix(strings.ToLower(hostInfo), "https://") {
+		if !strings.HasPrefix(strings.ToLower(hostInfo), "http://") {
+			hostInfo = "http://" + hostInfo
+		} else {
+			hostInfo = "https://" + hostInfo
+		}
+	}
 	// Create an HTTP.Request object
 	procedureRequest, err := http.NewRequest(config.Method, hostInfo+config.Uri, strings.NewReader(config.Body))
 	if err != nil {

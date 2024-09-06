@@ -3,7 +3,7 @@ package Core
 import (
 	Format "GoPoc/main/Developer/AllFormat"
 	handle2 "GoPoc/main/Developer/Handle"
-	"GoPoc/main/Developer/Http"
+	"GoPoc/main/Developer/HttpAbout"
 	"GoPoc/main/Log"
 	"bytes"
 	"context"
@@ -15,7 +15,7 @@ import (
 )
 
 func ForSendByJson(urlsList []string, pocStruct Format.PocStruct, inputProxy string, maxConcurrentLevel int) {
-	client := Http.SetProxy(inputProxy)
+	client := HttpAbout.SetProxy(inputProxy)
 	customRequestBody := []byte(pocStruct.RequestPackage.Body)
 	waitGroup := &sync.WaitGroup{}
 

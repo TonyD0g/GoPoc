@@ -1,9 +1,6 @@
-1.5.5 更新日志
-- 增加: 发包前检测各项IP地址,确保挂了代理,否则被溯源
-- 增加: 检测是否开启了burp,如果没有开启则输出“没有开启” 且直接退出
-- 更改: 将 config.ini 中的 url 和 file 保存到 poc 中,这样更换poc时不用再改 config.ini 中的 url 或 file 选项
-- 优化: "输入请求体，全自动构造 header" ,现在自动化构造的header不会再有重复项了
-- 优化: main 方法优化
-- 修复: 潜在的溢出bug修复
-- 修复: 无法使用 "输入请求体，全自动构造 header" 功能的Bug
+1.5.6 更新日志
+- 增加: 设置默认协程为200
+- 增加: 开启的协程现在可以写入 poc 中了,例如JSON中填写:"Coroutine":"20"则使用线程数20,如果Json中没写则使用全局协程
+- 修复: 为了防止和原生库包名重复,因此包名http改变,意味着你之前写的脚本需要改一改: "GoPoc/main/Developer/http" 更改为 "GoPoc/main/Developer/HttpAbout"
+- 修复: bug fix
 
