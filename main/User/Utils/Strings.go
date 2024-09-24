@@ -2,6 +2,7 @@ package Utils
 
 import (
 	"GoPoc/main/Developer/HttpAbout"
+	"bufio"
 	"bytes"
 	"fmt"
 	"math/rand"
@@ -77,10 +78,22 @@ func ParseHeaders(input string) {
 	}
 }
 
-// FullyAutomaticFillingHeader 输入请求体，全自动构造 header 【但可能存在Bug,如果遇到bug了,那还是人为构造吧】
+// FullyAutomaticFillingHeader 输入请求体，全自动构造 header
 func FullyAutomaticFillingHeader(config HttpAbout.SetHttpConfig, input string) HttpAbout.SetHttpConfig {
-	// 创建一个正则表达式，用于匹配键值对
-	re := regexp.MustCompile(`(?m)^\s*(\S+):\s*(.*)$`) // todo 这个正则表达式可能会存在问题
+	// 按行扫描,划分出请求头
+	var headerLines []string
+	var currentPosition int
+	scanner := bufio.NewScanner(strings.NewReader(input))
+	for scanner.Scan() {
+		line := scanner.Text()
+		currentPosition++
+		if strings.TrimSpace(line) == "" {
+			break
+		}
+		headerLines = append(headerLines, line)
+	}
+	input = strings.Join(headerLines, "\r\n")
+	re := regexp.MustCompile(`(?m)^\s*(\S+):\s*(.*)$`)
 	matches := re.FindAllStringSubmatch(input, -1)
 
 	// 创建一个map来存储结果

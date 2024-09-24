@@ -162,7 +162,7 @@ func evaluatePostfix(expression string, bodyArrayByBool []bool, headerArrayByBoo
 	return stackByBool[0]
 }
 
-// 获取逆波兰表达式	todo 优先级最高
+// 获取逆波兰表达式
 func reversePolishNotation(expression string) string {
 	expression = strings.ReplaceAll(expression, " ", "")
 	polishNotationByStr := ""

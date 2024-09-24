@@ -208,7 +208,7 @@ Connection: close
 func main() {
 	fmt.Println("            ______          \n            | ___ \\         \n  __ _  ___ | |_/ /__   ___ \n / _` |/ _ \\|  __/ _ \\ / __|\n| (_| | (_) | | | (_) | (__ \n \\__, |\\___/\\_|  \\___/ \\___|\n  __/ |                     \n |___/                      ")
 	fmt.Println("基于 Json 、自定义Go脚本、fofa的快速验证扫描引擎，可用于快速验证目标是否存在该漏洞或者帮助你优化工作流程	-- TonyD0g")
-	fmt.Println("Version 1.5.6")
+	fmt.Println("Version 1.5.7")
 	config := parseConfigIni()
 	selectModule(config, 5)
 	Log.Log.Println("\n[+] 扫描结束,如果什么输出链接则说明没有扫出来")
