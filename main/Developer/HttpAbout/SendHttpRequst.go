@@ -3,6 +3,7 @@ package HttpAbout
 import (
 	"GoPoc/main/Developer/AllFormat"
 	"context"
+	"fmt"
 	"io"
 	"math/rand"
 	"net/http"
@@ -12,7 +13,6 @@ import (
 
 func SendHttpRequest(hostInfo string, config SetHttpConfig) (Format.CustomResponseFormat, error) {
 	var customResponse Format.CustomResponseFormat
-
 	if !strings.HasPrefix(strings.ToLower(hostInfo), "http://") && !strings.HasPrefix(strings.ToLower(hostInfo), "https://") {
 		if !strings.HasPrefix(strings.ToLower(hostInfo), "http://") {
 			hostInfo = "http://" + hostInfo
@@ -20,6 +20,18 @@ func SendHttpRequest(hostInfo string, config SetHttpConfig) (Format.CustomRespon
 			hostInfo = "https://" + hostInfo
 		}
 	}
+	if config.Client == nil {
+		fmt.Println("[-] 你忘记给 config 设置 client 了!\n 示例代码:	config.Client = client")
+	}
+
+	if config.Method == "" {
+		config.Method = "GET"
+	} else if strings.ToLower(config.Method) == "post" || strings.ToLower(config.Method) == "p" {
+		config.Method = "POST"
+	} else if strings.ToLower(config.Method) == "get" || strings.ToLower(config.Method) == "g" {
+		config.Method = "GET"
+	}
+
 	// Create an HTTP.Request object
 	procedureRequest, err := http.NewRequest(config.Method, hostInfo+config.Uri, strings.NewReader(config.Body))
 	if err != nil {

@@ -51,14 +51,18 @@ func selectModule(config map[string]string, timeSet time.Duration) {
 	detectionBurpIsOpen(config["proxy"]) // 检测是否开启了burp,如果没有开启则输出“没有开启” 且直接返回
 	Log.Log.Println("[+] 加载的脚本为: " + config["vul"])
 	Log.Log.Println("[+] 开启的协程数为: " + strconv.Itoa(maxConcurrentLevelInt))
-	ipAddressList := getIpAddress(config["proxy"]) // 检测是否开启代理
-	if len(ipAddressList) < 3 {
-		ipAddressList = append(ipAddressList, "null")
+
+	if strings.ToLower(pocStruct.CheckIP) != "false" { // 允许脚本不检测ip,直接开始执行,作用为对某些工作用的脚本省去几秒等待时间
+		ipAddressList := getIpAddress(config["proxy"]) // 检测是否开启代理
+		if len(ipAddressList) < 3 {
+			ipAddressList = append(ipAddressList, "null")
+		}
+		Log.Log.Printf("[+] 国内发包IP地址为: %s \t国外发包IP地址为: %s \t谷歌访问测试: %s ", ipAddressList[0], ipAddressList[1], ipAddressList[2])
+		Log.Log.Println("[+] 【重要,必看】请确认各项IP地址无误,如扫描国内则看\"国内发包IP地址\"是否为代理IP地址,其他以此类推,不然被溯源了!")
+		Log.Log.Println("[+] 将在5秒后自动开始扫描")
+		time.Sleep(timeSet * time.Second) // 休眠5秒
 	}
-	Log.Log.Printf("[+] 国内发包IP地址为: %s \t国外发包IP地址为: %s \t谷歌访问测试: %s ", ipAddressList[0], ipAddressList[1], ipAddressList[2])
-	Log.Log.Println("[+] 【重要,必看】请确认各项IP地址无误,如扫描国内则看\"国内发包IP地址\"是否为代理IP地址,其他以此类推,不然被溯源了!")
-	Log.Log.Println("[+] 将在5秒后自动开始扫描")
-	time.Sleep(timeSet * time.Second) // 休眠5秒
+
 	Log.Log.Println("[+] 扫描开始:")
 	// 发包模式1 基于 fofa 搜索
 	if userInputDetectionURL == "" {
@@ -206,7 +210,7 @@ Connection: close
 }
 
 func main() {
-	fmt.Println("            ______          \n            | ___ \\         \n  __ _  ___ | |_/ /__   ___ \n / _` |/ _ \\|  __/ _ \\ / __|\n| (_| | (_) | | | (_) | (__ \n \\__, |\\___/\\_|  \\___/ \\___|\n  __/ |                     \n |___/                      ")
+	fmt.Println("   ████████           ███████                  \n  ██░░░░░░██         ░██░░░░██                 \n ██      ░░   ██████ ░██   ░██  ██████   █████ \n░██          ██░░░░██░███████  ██░░░░██ ██░░░██\n░██    █████░██   ░██░██░░░░  ░██   ░██░██  ░░ \n░░██  ░░░░██░██   ░██░██      ░██   ░██░██   ██\n ░░████████ ░░██████ ░██      ░░██████ ░░█████ \n  ░░░░░░░░   ░░░░░░  ░░        ░░░░░░   ░░░░░  \n\n")
 	fmt.Println("基于 Json 、自定义Go脚本、fofa的快速验证扫描引擎，可用于快速验证目标是否存在该漏洞或者帮助你优化工作流程	-- TonyD0g")
 	fmt.Println("Version 1.5.7")
 	config := parseConfigIni()
