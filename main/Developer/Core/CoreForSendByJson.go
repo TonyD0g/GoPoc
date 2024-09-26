@@ -14,8 +14,8 @@ import (
 	"time"
 )
 
-func ForSendByJson(urlsList []string, pocStruct Format.PocStruct, inputProxy string, maxConcurrentLevel int) {
-	client := HttpAbout.SetProxy(inputProxy)
+func ForSendByJson(urlsList []string, pocStruct Format.PocStruct, maxConcurrentLevel int) {
+	client := HttpAbout.SetProxy(HttpAbout.InputProxy, false)
 	customRequestBody := []byte(pocStruct.RequestPackage.Body)
 	waitGroup := &sync.WaitGroup{}
 

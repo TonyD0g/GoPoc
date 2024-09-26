@@ -6,7 +6,7 @@ import (
 	"net/url"
 )
 
-func SetProxy(inputProxy string) *http.Client {
+func SetProxy(inputProxy string, followRedirects bool) *http.Client {
 	// 创建一个代理函数，将请求发送到指定的本地端口
 	proxy := func(_ *http.Request) (*url.URL, error) {
 		return url.Parse(inputProxy)
@@ -21,8 +21,11 @@ func SetProxy(inputProxy string) *http.Client {
 	// 创建一个使用自定义 Transport 的 HTTP 客户端
 	client := &http.Client{
 		Transport: transport,
-		CheckRedirect: func(*http.Request, []*http.Request) error {
-			return http.ErrUseLastResponse
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			if !followRedirects {
+				return http.ErrUseLastResponse // 如果不追随重定向，则返回上一个response
+			}
+			return nil // 如果跟随重定向，则允许继续
 		},
 	}
 	return client

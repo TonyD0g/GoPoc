@@ -38,10 +38,14 @@ func SendForFofa(config map[string]string, pocStruct Format.PocStruct) []string 
 
 func SendForUrlOrFile(userInputDetectionURL string) []string {
 	var urlsList []string
-	if strings.HasPrefix(strings.ToLower(userInputDetectionURL), "Http://") || strings.HasPrefix(strings.ToLower(userInputDetectionURL), "https://") {
+	if strings.Contains(strings.ToLower(userInputDetectionURL), "[url]") {
+		userInputDetectionURL = userInputDetectionURL[5:]
+		if !strings.HasPrefix(strings.ToLower(userInputDetectionURL), "http://") && !strings.HasPrefix(strings.ToLower(userInputDetectionURL), "https://") {
+			userInputDetectionURL = "http://" + userInputDetectionURL
+		}
 		urlsList = append(urlsList, userInputDetectionURL)
 	} else {
-		// urlFile list
+		userInputDetectionURL = userInputDetectionURL[6:]
 		urlFile, err := os.Open(userInputDetectionURL)
 		if err != nil {
 			Log.Log.Fatal("can't open file:", err)
@@ -63,5 +67,6 @@ func SendForUrlOrFile(userInputDetectionURL string) []string {
 			line = ""
 		}
 	}
+
 	return urlsList
 }

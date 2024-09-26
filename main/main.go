@@ -26,9 +26,9 @@ func selectModule(config map[string]string, timeSet time.Duration) {
 	pocStruct = Handle.TryToParsePocStruct(User.Json)
 	var userInputDetectionURL string
 	if pocStruct.Url != "" {
-		userInputDetectionURL = pocStruct.Url
+		userInputDetectionURL = "[url]" + pocStruct.Url
 	} else if pocStruct.File != "" {
-		userInputDetectionURL = pocStruct.File
+		userInputDetectionURL = "[file]" + pocStruct.File
 	} else {
 		userInputDetectionURL = ""
 	}
@@ -51,9 +51,10 @@ func selectModule(config map[string]string, timeSet time.Duration) {
 	detectionBurpIsOpen(config["proxy"]) // 检测是否开启了burp,如果没有开启则输出“没有开启” 且直接返回
 	Log.Log.Println("[+] 加载的脚本为: " + config["vul"])
 	Log.Log.Println("[+] 开启的协程数为: " + strconv.Itoa(maxConcurrentLevelInt))
+	HttpAbout.InputProxy = config["proxy"]
 
 	if strings.ToLower(pocStruct.CheckIP) != "false" { // 允许脚本不检测ip,直接开始执行,作用为对某些工作用的脚本省去几秒等待时间
-		ipAddressList := getIpAddress(config["proxy"]) // 检测是否开启代理
+		ipAddressList := getIpAddress() // 检测是否开启代理
 		if len(ipAddressList) < 3 {
 			ipAddressList = append(ipAddressList, "null")
 		}
@@ -68,15 +69,14 @@ func selectModule(config map[string]string, timeSet time.Duration) {
 	if userInputDetectionURL == "" {
 		urlsList = HttpAbout.SendForFofa(config, pocStruct)
 	} else {
-		// 发包模式2 基于 单个url / urlFile 文件
-		urlsList = HttpAbout.SendForUrlOrFile(userInputDetectionURL)
+		urlsList = HttpAbout.SendForUrlOrFile(userInputDetectionURL) // 发包模式2 基于 单个url / urlFile 文件
 	}
 	if Core.CheckBalanced(pocStruct.Fofa) {
 		Log.Log.Fatal("[-] 请检测fofa语句是否正确,着重检查括号是否正确闭合")
 	}
 
 	if pocModule == 1 {
-		Core.ForSendByJson(urlsList, pocStruct, config["proxy"], maxConcurrentLevelInt)
+		Core.ForSendByJson(urlsList, pocStruct, maxConcurrentLevelInt)
 	} else if config["mod"] == "poc" || config["mod"] == "" {
 		Core.ForSendByCode("poc", urlsList, config["proxy"], maxConcurrentLevelInt, config["detectionMode"], pocStruct)
 	} else {
@@ -124,7 +124,7 @@ func detectionBurpIsOpen(proxyAddress string) {
 	}(conn) // 关闭连接
 }
 
-func getIpAddress(proxy string) []string {
+func getIpAddress() []string {
 	var ipAddressList []string
 	config := HttpAbout.NewHttpConfig()
 	Utils.FullyAutomaticFillingHeader(config, `GET / HTTP/1.1
@@ -142,8 +142,7 @@ Priority: u=0, i
 Te: trailers
 Connection: close`)
 	config.TimeOut = 60
-	client := HttpAbout.SetProxy(proxy)
-	config.Client = client
+	config.IsRedirect = false
 	resp, err := HttpAbout.SendHttpRequest(`Http://www.ip111.cn`, config)
 	if err != nil {
 		log.Fatal("[-] 获取ip地址失误,请检查你的网络是否正常或者 Http://www.ip111.cn 这个链接是否挂了")
@@ -212,7 +211,7 @@ Connection: close
 func main() {
 	fmt.Println("   ████████           ███████                  \n  ██░░░░░░██         ░██░░░░██                 \n ██      ░░   ██████ ░██   ░██  ██████   █████ \n░██          ██░░░░██░███████  ██░░░░██ ██░░░██\n░██    █████░██   ░██░██░░░░  ░██   ░██░██  ░░ \n░░██  ░░░░██░██   ░██░██      ░██   ░██░██   ██\n ░░████████ ░░██████ ░██      ░░██████ ░░█████ \n  ░░░░░░░░   ░░░░░░  ░░        ░░░░░░   ░░░░░  \n\n")
 	fmt.Println("基于 Json 、自定义Go脚本、fofa的快速验证扫描引擎，可用于快速验证目标是否存在该漏洞或者帮助你优化工作流程	-- TonyD0g")
-	fmt.Println("Version 1.5.7")
+	fmt.Println("Version 1.5.8")
 	config := parseConfigIni()
 	selectModule(config, 5)
 	Log.Log.Println("\n[+] 扫描结束,如果什么输出链接则说明没有扫出来")

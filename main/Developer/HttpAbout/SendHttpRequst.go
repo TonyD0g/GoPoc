@@ -3,7 +3,6 @@ package HttpAbout
 import (
 	"GoPoc/main/Developer/AllFormat"
 	"context"
-	"fmt"
 	"io"
 	"math/rand"
 	"net/http"
@@ -20,9 +19,7 @@ func SendHttpRequest(hostInfo string, config SetHttpConfig) (Format.CustomRespon
 			hostInfo = "https://" + hostInfo
 		}
 	}
-	if config.Client == nil {
-		fmt.Println("[-] 你忘记给 config 设置 client 了!\n 示例代码:	config.Client = client")
-	}
+	config.Client = SetProxy(InputProxy, config.IsRedirect)
 
 	if config.Method == "" {
 		config.Method = "GET"

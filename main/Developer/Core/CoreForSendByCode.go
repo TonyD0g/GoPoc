@@ -5,14 +5,12 @@ import (
 	"GoPoc/main/Developer/HttpAbout"
 	"GoPoc/main/Log"
 	"GoPoc/main/User"
-	"net/http"
 	"net/url"
 	"strings"
 	"sync"
 )
 
 func ForSendByCode(pocOrExp string, urlsList []string, inputProxy string, maxConcurrentLevel int, isDetectionMode string, pocStruct Format.PocStruct) {
-	client := HttpAbout.SetProxy(inputProxy)
 	waitGroup := &sync.WaitGroup{}
 
 	// 计算要划分的小的urlsList数量
@@ -44,7 +42,7 @@ func ForSendByCode(pocOrExp string, urlsList []string, inputProxy string, maxCon
 					continue
 				}
 
-				if IsExploitSuccessByCode(pocOrExp, tmpUrl, client, isDetectionMode, pocStruct) {
+				if IsExploitSuccessByCode(pocOrExp, tmpUrl, isDetectionMode, pocStruct) {
 					if splitURL := strings.Split(tmpUrl, "?"); len(splitURL) >= 2 {
 						params := strings.Split(splitURL[1], "&")
 						encodedParams := make([]string, len(params))
@@ -64,7 +62,7 @@ func ForSendByCode(pocOrExp string, urlsList []string, inputProxy string, maxCon
 }
 
 // IsDetectionMode 开启检测模式
-func IsDetectionMode(hostInfo string, client *http.Client, pocStruct Format.PocStruct) bool {
+func IsDetectionMode(hostInfo string, pocStruct Format.PocStruct) bool {
 	Log.Log.Println("[+] 已开启探测模式,将根据规则中的Uri发起一个请求,如果不符合自定义规则,则不执行 Poc/Exp 部分")
 	conditions, bodyArray, headerArray, bodyCounter, headerCounter := getKeyOperatorValue(pocStruct.Fofa) // 获取所有的键值对以及算数运算符
 
@@ -80,7 +78,6 @@ func IsDetectionMode(hostInfo string, client *http.Client, pocStruct Format.PocS
 	config.Uri = pocStruct.Uri
 	config.TimeOut = 10
 	config.Method = "GET"
-	config.Client = client
 	resp, err := HttpAbout.SendHttpRequest(hostInfo, config)
 	if err != nil {
 		Log.Log.Fatal("[-] 解析探测语句失败! :", err)
@@ -134,9 +131,9 @@ func IsDetectionMode(hostInfo string, client *http.Client, pocStruct Format.PocS
 	return evaluatePostfix(reversePolishNotationByStr, bodyArrayByBool, headerArrayByBool) // 根据逆波兰语句来计算返回整个表达式的逻辑运算结果
 }
 
-func IsExploitSuccessByCode(pocOrExp, hostInfo string, client *http.Client, isDetectionMode string, pocStruct Format.PocStruct) bool {
+func IsExploitSuccessByCode(pocOrExp, hostInfo string, isDetectionMode string, pocStruct Format.PocStruct) bool {
 	if isDetectionMode == "true" {
-		if !IsDetectionMode(hostInfo, client, pocStruct) {
+		if !IsDetectionMode(hostInfo, pocStruct) {
 			return false
 		}
 	}
@@ -146,12 +143,12 @@ func IsExploitSuccessByCode(pocOrExp, hostInfo string, client *http.Client, isDe
 		expResult.HostInfo = hostInfo
 		expResult.Success = false
 		expResult.Output = ""
-		expResult = User.Exp(expResult, client)
+		expResult = User.Exp(expResult)
 		if expResult.Success {
 			Log.Log.Println(expResult.Output)
 			return true
 		}
 		return false
 	}
-	return User.Poc(hostInfo, client)
+	return User.Poc(hostInfo)
 }

