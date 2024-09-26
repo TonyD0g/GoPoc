@@ -48,7 +48,7 @@
 -vul // poc/exp文件,文件后缀为.go (必须)
 -mod // 指定poc/exp这两种模式 (必须)
 -proxy // burpsuite 代理,用于方便写poc/exp (必须)
--maxConcurrentLevel // 最大并发量,越大扫描速度越快,取决于你CPU (必须)
+-maxConcurrentLevel // 最大并发量,越大扫描速度越快,取决于你CPU (非必须,不填默认为200)
 -maxFofaSize     // fofa最大检索数 (必须)
 ------------------------------------
 例如
