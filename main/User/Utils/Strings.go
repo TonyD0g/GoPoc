@@ -92,6 +92,9 @@ func FullyAutomaticFillingHeader(config HttpAbout.SetHttpConfig, input string) H
 		}
 		headerLines = append(headerLines, line)
 	}
+	sendMethod := strings.Fields(headerLines[0])
+	config.Method = sendMethod[0]
+
 	input = strings.Join(headerLines, "\r\n")
 	re := regexp.MustCompile(`(?m)^\s*(\S+):\s*(.*)$`)
 	matches := re.FindAllStringSubmatch(input, -1)

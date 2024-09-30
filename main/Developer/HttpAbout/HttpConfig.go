@@ -6,13 +6,13 @@ import (
 )
 
 type SetHttpConfig struct {
-	TimeOut    time.Duration
-	Method     string
-	Body       string
-	Uri        string
-	Client     *http.Client
-	Header     map[string]string
-	IsRedirect bool // 是否重定向
+	TimeOut    time.Duration     // 请求等待时间
+	Method     string            // 请求方法
+	Body       string            // 请求体
+	Uri        string            // 请求的路径
+	Client     *http.Client      // 代理选项
+	Header     map[string]string //请求头
+	IsRedirect bool              // 是否重定向
 }
 
 func NewHttpConfig() SetHttpConfig {

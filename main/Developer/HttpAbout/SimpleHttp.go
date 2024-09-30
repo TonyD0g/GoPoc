@@ -40,12 +40,14 @@ func SendForUrlOrFile(userInputDetectionURL string) []string {
 	var urlsList []string
 	if strings.Contains(strings.ToLower(userInputDetectionURL), "[url]") {
 		userInputDetectionURL = userInputDetectionURL[5:]
+		Log.Log.Println("[+] 基于单个url进行扫描: " + userInputDetectionURL)
 		if !strings.HasPrefix(strings.ToLower(userInputDetectionURL), "http://") && !strings.HasPrefix(strings.ToLower(userInputDetectionURL), "https://") {
 			userInputDetectionURL = "http://" + userInputDetectionURL
 		}
 		urlsList = append(urlsList, userInputDetectionURL)
 	} else {
 		userInputDetectionURL = userInputDetectionURL[6:]
+		Log.Log.Println("[+] 基于指定路径进行扫描: " + userInputDetectionURL)
 		urlFile, err := os.Open(userInputDetectionURL)
 		if err != nil {
 			Log.Log.Fatal("can't open file:", err)

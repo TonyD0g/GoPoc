@@ -5,6 +5,7 @@ import (
 	"GoPoc/main/Developer/HttpAbout"
 	"GoPoc/main/Log"
 	"GoPoc/main/User"
+	"fmt"
 	"net/url"
 	"strings"
 	"sync"
@@ -31,8 +32,12 @@ func ForSendByCode(pocOrExp string, urlsList []string, inputProxy string, maxCon
 
 		subURLsList := urlsList[start:end]
 		waitGroup.Add(1)
+		panicIndex := i
 		go func(subURLs []string) {
 			defer func() {
+				if r := recover(); r != nil {
+					fmt.Printf("协程 %d 从报错中恢复: %v\n", panicIndex, r)
+				}
 				waitGroup.Add(-1)
 			}()
 
@@ -41,20 +46,20 @@ func ForSendByCode(pocOrExp string, urlsList []string, inputProxy string, maxCon
 				if err != nil {
 					continue
 				}
-
-				if IsExploitSuccessByCode(pocOrExp, tmpUrl, isDetectionMode, pocStruct) {
-					if splitURL := strings.Split(tmpUrl, "?"); len(splitURL) >= 2 {
-						params := strings.Split(splitURL[1], "&")
-						encodedParams := make([]string, len(params))
-						for tmpI := range params {
-							p := strings.Split(params[tmpI], "=")
-							encodedParams[tmpI] = url.QueryEscape(p[0]) + "=" + url.QueryEscape(p[1])
-						}
-						Log.Log.Println("[+] [ " + parsedURL.Scheme + "://" + parsedURL.Host + "/" + strings.Join(encodedParams, "&") + " ]\tSuccess! The target may have this vulnerability")
-					} else {
-						Log.Log.Println("[+] [ " + parsedURL.Scheme + "://" + parsedURL.Host + "/" + " ]\tSuccess! The target may have this vulnerability")
-					}
+				if !IsExploitSuccessByCode(pocOrExp, tmpUrl, isDetectionMode, pocStruct) {
+					continue
 				}
+				splitURL := strings.Split(tmpUrl, "?")
+				if len(splitURL) < 2 {
+					Log.Log.Println("[+] [ " + parsedURL.Scheme + "://" + parsedURL.Host + "/" + " ]\tSuccess! The target may have this vulnerability")
+				}
+				params := strings.Split(splitURL[1], "&")
+				encodedParams := make([]string, len(params))
+				for tmpI := range params {
+					p := strings.Split(params[tmpI], "=")
+					encodedParams[tmpI] = url.QueryEscape(p[0]) + "=" + url.QueryEscape(p[1])
+				}
+				Log.Log.Println("[+] [ " + parsedURL.Scheme + "://" + parsedURL.Host + "/" + strings.Join(encodedParams, "&") + " ]\tSuccess! The target may have this vulnerability")
 			}
 		}(subURLsList)
 	}

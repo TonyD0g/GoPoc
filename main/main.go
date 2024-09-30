@@ -49,7 +49,11 @@ func selectModule(config map[string]string, timeSet time.Duration) {
 
 	var urlsList []string
 	detectionBurpIsOpen(config["proxy"]) // 检测是否开启了burp,如果没有开启则输出“没有开启” 且直接返回
-	Log.Log.Println("[+] 加载的脚本为: " + config["vul"])
+	if pocStruct.VulnName != "" {
+		Log.Log.Println("[+] 加载的脚本名为: " + pocStruct.VulnName)
+	}
+
+	Log.Log.Println("[+] 加载的脚本的路径为: " + config["vul"])
 	Log.Log.Println("[+] 开启的协程数为: " + strconv.Itoa(maxConcurrentLevelInt))
 	HttpAbout.InputProxy = config["proxy"]
 
@@ -65,8 +69,8 @@ func selectModule(config map[string]string, timeSet time.Duration) {
 	}
 
 	Log.Log.Println("[+] 扫描开始:")
-	// 发包模式1 基于 fofa 搜索
 	if userInputDetectionURL == "" {
+		Log.Log.Println("[+] 基于 fofa 进行搜索案例:")
 		urlsList = HttpAbout.SendForFofa(config, pocStruct)
 	} else {
 		urlsList = HttpAbout.SendForUrlOrFile(userInputDetectionURL) // 发包模式2 基于 单个url / urlFile 文件
@@ -211,7 +215,7 @@ Connection: close
 func main() {
 	fmt.Println("   ████████           ███████                  \n  ██░░░░░░██         ░██░░░░██                 \n ██      ░░   ██████ ░██   ░██  ██████   █████ \n░██          ██░░░░██░███████  ██░░░░██ ██░░░██\n░██    █████░██   ░██░██░░░░  ░██   ░██░██  ░░ \n░░██  ░░░░██░██   ░██░██      ░██   ░██░██   ██\n ░░████████ ░░██████ ░██      ░░██████ ░░█████ \n  ░░░░░░░░   ░░░░░░  ░░        ░░░░░░   ░░░░░  \n\n")
 	fmt.Println("基于 Json 、自定义Go脚本、fofa的快速验证扫描引擎，可用于快速验证目标是否存在该漏洞或者帮助你优化工作流程	-- TonyD0g")
-	fmt.Println("Version 1.5.8")
+	fmt.Println("Version 1.5.9")
 	config := parseConfigIni()
 	selectModule(config, 5)
 	Log.Log.Println("\n[+] 扫描结束,如果什么输出链接则说明没有扫出来")

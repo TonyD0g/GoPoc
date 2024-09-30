@@ -4,6 +4,10 @@ import (
 	"GoPoc/main/Developer/AllFormat"
 	"GoPoc/main/Developer/HttpAbout"
 	"GoPoc/main/User/Utils"
+	"fmt"
+	"log"
+	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -11,127 +15,242 @@ var Json string
 var Poc func(hostInfo string) bool
 var Exp func(expResult Format.ExpResult) Format.ExpResult
 
-// Poc 编写,以 dvwa 靶场的sql注入为例
+// todo 输出 漏洞详情翻译的内容
 func init() {
-	// 有代码使用代码,无代码使用json
-	// 如果存在代码,可以不写Json格式(即Json格式有架构,但内容为空).但必须存在 fofa语句
-	// 此处的json只是说明json的使用方式,与代码模式并无关联
 	Json = `{
-	"CheckIP":"false",
+   "CheckIP":"false",
+   "Coroutine":"200",
+   "File":"",
+   "Url":"https://portal.tophant.com",
+   "Fofa":"",
+ 	"Uri":"",
+   "Request":{
 
-  	"Coroutine":"10",
+		"Method": "",
 
-  	"File":"",
+		"Uri": [
+	   			],
 
-  	"Url":"127.0.0.1",
+		"Header":{
+			"Accept-Encoding":"gzip"
+		}
+	},
 
-    "Fofa":"body=\"Login :: Damn Vulnerable Web Application\"",
-    "Uri" : "/dvwa/",
+   "Response":{
 
-    "Request":{
+		"Operation":"",
 
-    "Method": "GET",
+		"Group":[
 
-    "Uri": [
-          "/robots.txt",
-               "/hello.txt"
-          ],
+				{
 
-    "Header":{
-      "Accept-Encoding":"gzip"
-    }
-  },
-   
-    "Response":{
-        
-    "Operation":"OR",
-        
-    "Group":[
-               
-        {
-                    
-                     "Regexp": ".*?",
-              "Header":{
-                                
-                                  "Status": "200"
-                  },
-              
-              "Body":[
-                          "Hello World",
-                                 "wahaha"
-                  ]
-          },
-               
-               {
-              "Header":{
-                                
-                                  "Status": "200"
-                  }
-          }
-      ]
+                    "Regexp": "",
+			        "Header":{
+			            },
+
+			        "Body":[
+			            ]
+			    },
+
+          		 {
+			        "Header":{
+			            }
+			    }
+			]
 
 }
 }`
 
-	getSessionByLogin := func(hostInfo string) (string, error) {
-		// 发起登录请求 --> 302跳转 --> 获取请求包中的session , 并返回
+	// 获取漏洞列表
+	getVulnList455445 := func(hostInfo string, page int, portalToken string) (Format.CustomResponseFormat, error) {
 		config := HttpAbout.NewHttpConfig()
-		config.Uri = "/dvwa/"
-		resp, err := HttpAbout.SendHttpRequest(hostInfo, config)
-		if err != nil {
-			return "", err
-		}
-		config.Header["Cookie"] = resp.Header["Set-Cookie"][0]
-		config.Body = "username=admin&password=password&Login=Login&user_token=" + Utils.RandomStringByModule(24, 1)
-		config.Uri = "/dvwa/login.php"
-		resp, err = HttpAbout.SendHttpRequest(hostInfo, config)
-		if err != nil {
-			return "", err
-		}
-		if !strings.Contains(resp.Body, "Welcome :: Damn Vulnerable Web ") {
-			return "", err
-		}
-		return resp.Header["Set-Cookie"][0], nil
+		Utils.FullyAutomaticFillingHeader(config, `POST /api/vip/vuln/base-list HTTP/1.1
+Host: portal.tophant.com
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:129.0) Gecko/20100101 Firefox/129.0
+Accept: application/json, text/plain, */*
+Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2
+Accept-Encoding: gzip, deflate
+Content-Type: application/json; charset=UTF-8
+Portal-Token: eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3MjQ4MTI0OTIsImxvZ2luX3VzZXJfa2V5IjoiMTcyMjg1NDQ2ODMzMjcwNTUifQ.WkGSxta9uWZ89Nc-I4vAQnnkeC0HDcLifROroaGrCnX9JPp_E4s5XvS2GKR64cLYSwclB0uPnaBdmpdDXRx0Cw
+Content-Length: 47
+Origin: https://portal.tophant.com
+Referer: https://portal.tophant.com/portal/vipManage/vip/vulnManage
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: same-origin
+Te: trailers
+Connection: close
+`)
+		config.Method = "POST"
+		config.Body = `{
+		   "lastUpdateTimeSort":0,
+			"publishTimeSort":null,
+			"manufacturerPublishSort":null,
+			"modifyTimeSort":null,
+		   "page": ` + strconv.Itoa(page) + `,
+		   "pageSize": 40 
+		}`
+		config.Header["Portal-Token"] = portalToken
+		fmt.Println("[+] 获取的是第 " + strconv.Itoa(page) + " 页, pageSize 为 40 ")
+		config.Uri = "/api/vip/vuln/base-list"
+		return HttpAbout.SendHttpRequest(hostInfo, config)
 	}
 
-	// 建议: 函数名+随机命名
-	sendLoginByToken455445 := func(hostInfo string) (Format.CustomResponseFormat, error) {
-		var err error
-		var customResponse Format.CustomResponseFormat
+	findCsvByNvd3248329 := func(match []string) (bool, string, string) {
 		config := HttpAbout.NewHttpConfig()
-		config.Header["Cookie"], err = getSessionByLogin(hostInfo) // (非强制) 自定义Header头
+		config.TimeOut = 10
+		re := regexp.MustCompile(`CVE-\d{4}-\d+`)
+		cveMatch := re.FindString(match[1])
+
+		resp, err := HttpAbout.SendHttpRequest(match[1], config)
 		if err != nil {
-			return customResponse, nil
+			return false, "", ""
 		}
+		if strings.Contains(resp.Body, "Linux kernel") || !strings.Contains(resp.Body, "CVSS:3.1") { // || strings.Contains(resp.Body, "CVE ID Not Found")
+			return false, "", ""
+		}
+		re = regexp.MustCompile(`class="tooltipCvss3CnaMetrics">(.*?)</span>`) // 没有 Nvd 链接跳转则直接下一个
+		matches := re.FindStringSubmatch(resp.Body)
+		if len(matches) < 2 {
+			return false, "", ""
+		}
+		return true, matches[1], cveMatch
+	}
+
+	// 获取漏洞细节
+	getVulnDetails5251552 := func(hostInfo string, ids []string, fixPath, isHavaCweNameCn, isSelectVulnName bool, portalToken string) (string, int) {
+		numForVuln := 0
+
+		config := HttpAbout.NewHttpConfig()
+		config.Header["Accept"] = "application/json, text/plain, */*"
+		config.Header["Accept-Encoding"] = "gzip, deflate, br"
+		config.Header["Content-Type"] = "application/json; charset=UTF-8"
+		config.Header["Origin"] = "https://portal.tophant.com"
+		config.Header["Referer"] = "https://portal.tophant.com/portal/vipManage/vip/vulnManage"
+		config.Header["Accept-Language"] = "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2"
+		config.Header["Portal-Token"] = portalToken
 		config.Header["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"
 		config.Header["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:129.0) Gecko/20100101 Firefox/129.0" // (非强制) 如果不写的话随机从默认URL列表上选取一个
-		config.TimeOut = 5                                                                                               // (非强制) 如果不写的话默认值为 5秒
-		config.Method = "GET"                                                                                            // (非强制) 如果不写的话默认值为 GET方式
-		//config.Body = `123`       																					// (非强制) 如果不写的话默认值为 ""
-		config.Uri = "/dvwa/index.php" // (非强制) 如果不写的话默认值为 ""
-		config.IsRedirect = true       // (非强制) 如果不写的话默认值为 false,即返回的响应包数据为重定向前的响应包
-		return HttpAbout.SendHttpRequest(hostInfo, config)
+		config.TimeOut = 10                                                                                              // (非强制) 如果不写的话默认值为 5秒
+
+		urlList := ""
+		for _, vulnId := range ids {
+			realUri := "/portal/vipManage/vip/vulnManage/edit?vulnId=" + vulnId + "&redirectName=vulnManage"
+			config.Uri = "/api/vip/vuln/edit/" + vulnId
+			resp, err := HttpAbout.SendHttpRequest(hostInfo, config)
+			if err != nil {
+				log.Fatal("[-] 服务器响应错误,要么是你请求的速度太快,要么是 session 失效 !")
+			}
+
+			if isSelectVulnName {
+				reForName := regexp.MustCompile(`"vulnName":"([^"]+)"`) // 漏洞标签简略则直接跳过
+				matchForName := reForName.FindStringSubmatch(resp.Body)
+				if strings.HasPrefix(strings.ToLower(matchForName[1]), "cve-20") {
+					continue
+				}
+			}
+
+			// todo bug
+			fixTypePatchExists := strings.Contains(resp.Body, "\"fixType\":\"patch\"")
+			if fixPath && fixTypePatchExists {
+				continue
+			}
+
+			re := regexp.MustCompile(`"linkUrl":"([^"]+)"`) // 无法点击Nvd标签则直接下一个
+			matches := re.FindAllStringSubmatch(resp.Body, -1)
+			var nvdMatch []string
+			isHaveNvd := false
+			for _, match := range matches {
+				if strings.Contains(match[1], "nvd.nist.gov/vuln/detail") {
+					nvdMatch = match
+					isHaveNvd = true
+					break
+				}
+			}
+			if !isHaveNvd {
+				continue
+			}
+
+			// 如果被审核过了,直接pass掉
+			if strings.Contains(resp.Body, "\"vulnAuthStatus\":\"examining\"") {
+				continue
+			}
+			if strings.Contains(resp.Body, "\"vulnAuthStatus\":\"released\"") {
+				continue
+			}
+
+			if isHavaCweNameCn {
+				re = regexp.MustCompile(`"cweNameCn":"([^"]+)"`) // 没有 漏洞类型 则直接下一个
+				matches := re.FindStringSubmatch(resp.Body)
+				if len(matches) < 1 {
+					continue
+				}
+			}
+
+			isHaveNvd, nvdValue, cveValue := findCsvByNvd3248329(nvdMatch)
+			if !isHaveNvd {
+				continue
+			}
+			numForVuln++
+			urlList = urlList + nvdValue + "  " + cveValue + "\n" + hostInfo + realUri + "\n"
+		}
+
+		return urlList, numForVuln
 	}
 
-	// 建议: 函数名+随机命名
-	sendSqlPayload5251552 := func(hostInfo string) (Format.CustomResponseFormat, error) {
-		config := HttpAbout.NewHttpConfig()
-		config.Header["Cookie"] = "security=low; PHPSESSID=1abcbe73869e90560e9061ca636c813e"
-		config.Uri = "/dvwa/vulnerabilities/sqli/?id=%27&Submit=Submit#"
-		return HttpAbout.SendHttpRequest(hostInfo, config)
+	// 返回收集到的所有漏洞列表
+	returnIdsList := func(resp Format.CustomResponseFormat) ([]string, bool) {
+		re := regexp.MustCompile(`"id"\s*:\s*"(\d+)"`)
+		matches := re.FindStringSubmatch(resp.Body)
+		if len(matches) < 1 {
+			return nil, false
+		}
+		matchesList := re.FindAllStringSubmatch(resp.Body, -1)
+		var ids []string
+		for _, match := range matchesList {
+			if len(match) > 1 {
+				// 添加匹配的 ID 到 ids 列表中
+				ids = append(ids, match[1])
+			}
+		}
+		return ids, true
 	}
 
 	// 如果使用代码模式, Poc函数为必须,其中的参数固定
 	Poc = func(hostInfo string) bool {
-		resp, err := sendLoginByToken455445(hostInfo)
+		portalToken := `eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mjc0MTIyNTYsImxvZ2luX3VzZXJfa2V5IjoiMTcyMjg1NDQ2ODMzMjcwNTUifQ.SwcQ3ecu7GHC3gr9vqOQWGxzC8r7mFEYyg1_Q6YtQpnwx-tWx1fHKbfNz-xHAOYEGRjgAzoj0qD2HP-jbkh-JA`
+		isChoiceFixPath := true  // 是否有修复方案
+		isHavaCweNameCn := true  // 是否有漏洞标签
+		isSelectVulnName := true // 是否选择对漏洞名称简略的进行跳过
+
+		resp, err := getVulnList455445(hostInfo, 1, portalToken)
 		if err != nil {
 			return false
 		}
-		if !strings.Contains(resp.Body, "Welcome to Damn") {
+		if !strings.Contains(resp.Status, "200") {
 			return false
 		}
-		resp, err = sendSqlPayload5251552(hostInfo)
-		return err == nil && strings.Contains(resp.Body, "You have an error in your SQL syntax;")
+		re := regexp.MustCompile(`"total":"(\d+)"`)
+		matches := re.FindStringSubmatch(resp.Body)
+		var totalPage int
+		intValue, _ := strconv.Atoi(matches[1])
+		totalPage = intValue / 40
+		fmt.Println("[+] 页数共有: " + strconv.Itoa(totalPage))
+		for i := 1; i < totalPage; i++ {
+			resp, _ := getVulnList455445(hostInfo, i, portalToken)
+			ids, isHaveReturn := returnIdsList(resp)
+			if !isHaveReturn {
+				continue
+			}
+
+			urlList, numForVuln := getVulnDetails5251552(hostInfo, ids, isChoiceFixPath, isHavaCweNameCn, isSelectVulnName, portalToken)
+			if len(urlList) == 0 {
+				continue
+			}
+			fmt.Println("[+] (" + strconv.FormatBool(isHavaCweNameCn) + ") 漏洞标签 (" + strconv.FormatBool(isChoiceFixPath) + ") 修复方案的漏洞链接为: \n" + urlList)
+			fmt.Println("目前为止输出了: " + strconv.Itoa(numForVuln) + " 个")
+		}
+		return true
 	}
 
 	// 如果使用代码模式, Exp函数为必须,其中的参数固定
