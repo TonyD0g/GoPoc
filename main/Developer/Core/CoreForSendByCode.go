@@ -36,7 +36,7 @@ func ForSendByCode(pocOrExp string, urlsList []string, inputProxy string, maxCon
 		go func(subURLs []string) {
 			defer func() {
 				if r := recover(); r != nil {
-					fmt.Printf("协程 %d 从报错中恢复: %v\n", panicIndex, r)
+					fmt.Printf("协程 %d 从报错中恢复,报错原因: %v\n\n", panicIndex, r)
 				}
 				waitGroup.Add(-1)
 			}()
@@ -52,14 +52,15 @@ func ForSendByCode(pocOrExp string, urlsList []string, inputProxy string, maxCon
 				splitURL := strings.Split(tmpUrl, "?")
 				if len(splitURL) < 2 {
 					Log.Log.Println("[+] [ " + parsedURL.Scheme + "://" + parsedURL.Host + "/" + " ]\tSuccess! The target may have this vulnerability")
+				} else {
+					params := strings.Split(splitURL[1], "&")
+					encodedParams := make([]string, len(params))
+					for tmpI := range params {
+						p := strings.Split(params[tmpI], "=")
+						encodedParams[tmpI] = url.QueryEscape(p[0]) + "=" + url.QueryEscape(p[1])
+					}
+					Log.Log.Println("[+] [ " + parsedURL.Scheme + "://" + parsedURL.Host + "/" + strings.Join(encodedParams, "&") + " ]\tSuccess! The target may have this vulnerability")
 				}
-				params := strings.Split(splitURL[1], "&")
-				encodedParams := make([]string, len(params))
-				for tmpI := range params {
-					p := strings.Split(params[tmpI], "=")
-					encodedParams[tmpI] = url.QueryEscape(p[0]) + "=" + url.QueryEscape(p[1])
-				}
-				Log.Log.Println("[+] [ " + parsedURL.Scheme + "://" + parsedURL.Host + "/" + strings.Join(encodedParams, "&") + " ]\tSuccess! The target may have this vulnerability")
 			}
 		}(subURLsList)
 	}
