@@ -49,8 +49,10 @@
 -vul // poc/exp文件,文件后缀为.go (必须)
 -mod // 指定poc/exp这两种模式 (必须)
 -proxy // burpsuite 代理,用于方便写poc/exp (必须)
--maxConcurrentLevel // 最大并发量,越大扫描速度越快,取决于你CPU (非必须,不填默认为200)
+-coroutine // 最大并发量,越大扫描速度越快,取决于你CPU性能 (非必须,不填默认为200)
 -maxFofaSize     // fofa最大检索数 (必须)
+-detectionMode // 是否开启探测模式,若开启则先发送一个包,根据响应包匹配指纹
+-builtinFingerprint // 为 true 时不使用用户输入的语句,而是使用 GoPoc 内置的指纹库去跑 [优点是内置指纹庞大,有7k条,缺点是扫描速度直线下降,因为要对庞大指纹库进行匹配]
 ------------------------------------
 例如
 -email
@@ -63,10 +65,14 @@ D:\Coding\Github\GoPoc\main\User\test.go
 poc
 -proxy
 http://127.0.0.1:8082
--maxConcurrentLevel
+-coroutine
 3
 -maxFofaSize
 300
+-detectionMode
+false
+-builtinFingerprint
+true
 ```
 
 - **利用模式**：

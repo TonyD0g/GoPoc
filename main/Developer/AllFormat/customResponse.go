@@ -15,6 +15,7 @@ type CustomResponseFormat struct {
 	ProtoMinor       int    // e.g. 0
 	Header           map[string][]string
 	RawBody          io.ReadCloser
+	Raw              string // 原始报文
 	ContentLength    int64
 	TransferEncoding []string
 	Close            bool

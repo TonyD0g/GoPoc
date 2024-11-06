@@ -1,0 +1,1 @@
+{"product": "MAIPU-router", "rule": "protocol=snmp && (banner=\"Maipu\" || banner=\"MyPower (R) \" || banner=\"MyPower \")"}

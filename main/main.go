@@ -38,13 +38,20 @@ func selectModule(config map[string]string, timeSet time.Duration) {
 	if pocStruct.Coroutine != "" {
 		maxConcurrentLevelInt, err = strconv.Atoi(pocStruct.Coroutine)
 	} else {
-		maxConcurrentLevelInt, err = strconv.Atoi(config["maxConcurrentLevel"])
+		maxConcurrentLevelInt, err = strconv.Atoi(config["coroutine"])
 	}
+	Core.MaxConcurrentLevelInt = maxConcurrentLevelInt
 	if err != nil {
-		maxConcurrentLevelInt = 200
+		Core.MaxConcurrentLevelInt = 200
 	}
-	if maxConcurrentLevelInt < 1 {
-		maxConcurrentLevelInt = 200
+	if Core.MaxConcurrentLevelInt < 1 {
+		Core.MaxConcurrentLevelInt = 200
+	}
+	if strings.ToLower(config["builtinFingerprint"]) == "true" {
+		Core.IsBuiltinFingerprint = true
+	}
+	if strings.ToLower(config["detectionMode"]) == "true" {
+		Core.IsDetectionModeByBool = true
 	}
 
 	var urlsList []string
@@ -54,7 +61,7 @@ func selectModule(config map[string]string, timeSet time.Duration) {
 	}
 
 	Log.Log.Println("[+] 加载的脚本的路径为: " + config["vul"])
-	Log.Log.Println("[+] 开启的协程数为: " + strconv.Itoa(maxConcurrentLevelInt))
+	Log.Log.Println("[+] 开启的协程数为: " + strconv.Itoa(Core.MaxConcurrentLevelInt))
 	HttpAbout.InputProxy = config["proxy"]
 
 	if strings.ToLower(pocStruct.CheckIP) != "false" { // 允许脚本不检测ip,直接开始执行,作用为对某些工作用的脚本省去几秒等待时间
@@ -80,11 +87,11 @@ func selectModule(config map[string]string, timeSet time.Duration) {
 	}
 
 	if pocModule == 1 {
-		Core.ForSendByJson(urlsList, pocStruct, maxConcurrentLevelInt)
+		Core.ForSendByJson(urlsList, pocStruct)
 	} else if config["mod"] == "poc" || config["mod"] == "" {
-		Core.ForSendByCode("poc", urlsList, config["proxy"], maxConcurrentLevelInt, config["detectionMode"], pocStruct)
+		Core.ForSendByCode("poc", urlsList, pocStruct)
 	} else {
-		Core.ForSendByCode("exp", urlsList, config["proxy"], maxConcurrentLevelInt, config["detectionMode"], pocStruct)
+		Core.ForSendByCode("exp", urlsList, pocStruct)
 	}
 }
 
@@ -215,7 +222,7 @@ Connection: close
 func main() {
 	fmt.Println("   ████████           ███████                  \n  ██░░░░░░██         ░██░░░░██                 \n ██      ░░   ██████ ░██   ░██  ██████   █████ \n░██          ██░░░░██░███████  ██░░░░██ ██░░░██\n░██    █████░██   ░██░██░░░░  ░██   ░██░██  ░░ \n░░██  ░░░░██░██   ░██░██      ░██   ░██░██   ██\n ░░████████ ░░██████ ░██      ░░██████ ░░█████ \n  ░░░░░░░░   ░░░░░░  ░░        ░░░░░░   ░░░░░  \n\n")
 	fmt.Println("基于 Json 、自定义Go脚本、fofa的快速验证扫描引擎，可用于快速验证目标是否存在该漏洞或者帮助你优化工作流程	-- TonyD0g")
-	fmt.Println("Version 1.5.9")
+	fmt.Println("[stable] Version 1.6.0")
 	config := parseConfigIni()
 	selectModule(config, 5)
 	Log.Log.Println("\n[+] 扫描结束,如果什么输出链接则说明没有扫出来")

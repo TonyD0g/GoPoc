@@ -3,6 +3,7 @@ package HttpAbout
 import (
 	"GoPoc/main/Developer/AllFormat"
 	"context"
+	"fmt"
 	"io"
 	"math/rand"
 	"net/http"
@@ -56,10 +57,16 @@ func SendHttpRequest(hostInfo string, config SetHttpConfig) (Format.CustomRespon
 		cancel()
 		return customResponse, err
 	}
-	//else if config.Method == "POST" && err != nil {
-	//	cancel()
-	//	return customResponse, err
-	//}
+
+	responseText := fmt.Sprintf("HTTP/1.1 %s\n", procedureResponse.Status)
+	for key, values := range procedureResponse.Header {
+		for _, value := range values {
+			responseText += fmt.Sprintf("%s: %s\n", key, value)
+		}
+	}
+	responseText += "\n" + string(bodyOfExecutionResults)
+
+	customResponse.Raw = responseText
 
 	customResponse.Body = string(bodyOfExecutionResults)
 	customResponse.Request = procedureResponse.Request
@@ -83,7 +90,6 @@ func SendHttpRequest(hostInfo string, config SetHttpConfig) (Format.CustomRespon
 
 // ProcessPackagesForCode 被用来处理包,包含请求包和响应包. 用处给未写明的header头字段赋予初值
 func ProcessPackagesForCode(procedureRequest *http.Request, config SetHttpConfig) {
-
 	var randomUserAgent string
 	if config.Header["User-Agent"] != "" {
 		randomUserAgent = config.Header["User-Agent"]

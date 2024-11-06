@@ -109,7 +109,7 @@ func FullyAutomaticFillingHeader(config HttpAbout.SetHttpConfig, input string) H
 		}
 	}
 	for key, value := range headers {
-		if key == "Host" || key == "User-Agent" {
+		if strings.ToLower(key) == "host" || strings.ToLower(key) == "user-agent" {
 			continue
 		}
 		config.Header[key] = value

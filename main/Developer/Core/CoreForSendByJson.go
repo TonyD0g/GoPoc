@@ -14,13 +14,13 @@ import (
 	"time"
 )
 
-func ForSendByJson(urlsList []string, pocStruct Format.PocStruct, maxConcurrentLevel int) {
+func ForSendByJson(urlsList []string, pocStruct Format.PocStruct) {
 	client := HttpAbout.SetProxy(HttpAbout.InputProxy, false)
 	customRequestBody := []byte(pocStruct.RequestPackage.Body)
 	waitGroup := &sync.WaitGroup{}
 
 	// 计算要划分的小的urlsList数量
-	numThreads := maxConcurrentLevel
+	numThreads := MaxConcurrentLevelInt
 	if numThreads > len(urlsList) {
 		numThreads = len(urlsList)
 	}
