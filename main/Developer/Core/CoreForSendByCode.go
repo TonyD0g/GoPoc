@@ -181,6 +181,7 @@ func IsDetectionMode(hostInfo string, pocStruct Format.PocStruct) bool {
 		}
 		if isHaveFingerprint {
 			Log.Log.Println(fmt.Sprintf("[+] url: %s 匹配到的指纹为: %s", hostInfo, fingerprintList))
+			return true
 		}
 	} else { // 代码重复,但是是故意的,为了性能优化,因此不写成一个方法
 		transformed, keyOperatorValue := convertLogicalExpression(pocStruct.Fofa)                  // 精简化语句,方便进行逆波兰运算
